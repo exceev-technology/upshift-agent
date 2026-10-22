@@ -58,7 +58,7 @@ Le contexte du contrôle vient uniquement de l'état du serveur : délégation d
 | Version du schéma | refus `schema-version-mismatch` |
 | Paramètres valides (zod, à l'exécution) | refus `invalid-params` |
 | Preuves requises présentes | refus `missing-evidence` |
-| Chaque référence de preuve résolue par le serveur dans le dossier | refus `unverified-evidence` |
+| Chaque référence de preuve résolue par le serveur dans le dossier, pour ce type de preuve | refus `unverified-evidence` |
 | État attendu fourni pour toute modification d'un dossier existant | refus `missing-precondition` |
 | État du dossier inchangé | refus `stale-state` : conflit visible |
 | Approbation enregistrée pour ce contenu exact et cette intention | `awaiting-approval` ; toute modification exige une nouvelle approbation |

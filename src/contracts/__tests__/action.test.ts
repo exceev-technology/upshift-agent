@@ -46,7 +46,10 @@ const context = (overrides: Partial<ActionCheckContext> = {}): ActionCheckContex
   allowedActions: AGENTS.engagement.allowedActions,
   currentState: 'QUALIFIED',
   executedIntentIds: new Set(),
-  verifiedEvidenceRefs: new Set([DRAFT_NOTE_ID, SOURCE_REF]),
+  verifiedEvidence: new Map([
+    ['draft', new Set([DRAFT_NOTE_ID])],
+    ['source', new Set([SOURCE_REF])],
+  ]),
   approvals: new Map(),
   ...overrides,
 });
@@ -113,6 +116,15 @@ describe('checkActionProposal', () => {
   it('refuses evidence the server could not resolve in the dossier', () => {
     const verdict = checkActionProposal(
       sendProposal({ preconditions: { expectedState: 'QUALIFIED', evidence: { draft: 'made-up' } } }),
+      context(),
+    );
+
+    expect(verdict).toMatchObject({ status: 'refused', reason: 'unverified-evidence' });
+  });
+
+  it('refuses a reference verified for another kind of evidence', () => {
+    const verdict = checkActionProposal(
+      sendProposal({ preconditions: { expectedState: 'QUALIFIED', evidence: { draft: SOURCE_REF } } }),
       context(),
     );
 

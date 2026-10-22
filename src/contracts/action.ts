@@ -84,8 +84,9 @@ export type ActionCheckContext = {
   allowedActions: readonly string[];
   currentState?: string;
   executedIntentIds: ReadonlySet<string>;
-  // References the server resolved in the CRM: they exist, belong to the dossier and have the expected kind.
-  verifiedEvidenceRefs: ReadonlySet<string>;
+  // References the server resolved in the CRM, per evidence key: they exist, belong to the dossier and have
+  // the kind that key expects. A reference verified for one key never counts for another.
+  verifiedEvidence: ReadonlyMap<string, ReadonlySet<string>>;
   // Approvals recorded by authorised members, keyed by the content hash they approved.
   approvals: ReadonlyMap<string, ActionApproval>;
 };
@@ -163,7 +164,7 @@ export const checkActionProposal = (
   }
 
   const unverifiedEvidence = Object.entries(evidence).filter(
-    ([, reference]) => !context.verifiedEvidenceRefs.has(reference),
+    ([key, reference]) => !context.verifiedEvidence.get(key)?.has(reference),
   );
 
   if (unverifiedEvidence.length > 0) {
