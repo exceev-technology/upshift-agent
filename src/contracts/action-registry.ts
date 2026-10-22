@@ -12,10 +12,12 @@ export const ACTION_REGISTRY: ActionRegistry = {
     schemaVersion: '0.1.0',
     category: 'bounded-change',
     description: 'Créer ou rapprocher une entreprise prospect, avec sa provenance et sa date.',
+    // The source is the verified `source` evidence and is not repeated here, so the recorded provenance
+    // can only be the one the server resolved.
     params: z.object({
       companyName: z.string().min(1),
       domain: z.string().min(1).optional(),
-      source: z.object({ reference: z.string().min(1), retrievedAt: z.iso.datetime() }),
+      retrievedAt: z.iso.datetime(),
       // Set when deduplication (S2) matched an existing company: the update then needs its expected state.
       matchedRecordId: recordId.optional(),
     }),

@@ -160,10 +160,7 @@ describe('checkActionProposal', () => {
   it('accepts a creation without an expected state', () => {
     const upsert = taskProposal({
       actionId: 'crm.prospect.upsert',
-      params: {
-        companyName: 'Exemple SARL',
-        source: { reference: SOURCE_REF, retrievedAt: '2026-10-22T08:00:00Z' },
-      },
+      params: { companyName: 'Exemple SARL', retrievedAt: '2026-10-22T08:00:00Z' },
       preconditions: { evidence: { source: SOURCE_REF } },
     });
 
@@ -172,13 +169,29 @@ describe('checkActionProposal', () => {
     ).toBe('ready');
   });
 
+  it('never takes the prospect source from the params, only from verified evidence', () => {
+    const upsert = taskProposal({
+      actionId: 'crm.prospect.upsert',
+      params: {
+        companyName: 'Exemple SARL',
+        retrievedAt: '2026-10-22T08:00:00Z',
+        source: { reference: 'invented-source' },
+      },
+      preconditions: { evidence: { source: SOURCE_REF } },
+    });
+    const verdict = checkActionProposal(upsert, context({ allowedActions: AGENTS.acquisition.allowedActions }));
+
+    expect(verdict.status).toBe('ready');
+    expect(verdict.status === 'ready' ? verdict.params : undefined).not.toHaveProperty('source');
+  });
+
   it('requires the expected state when an upsert matches an existing company', () => {
     const match = (preconditions: ActionProposal['preconditions']) =>
       taskProposal({
         actionId: 'crm.prospect.upsert',
         params: {
           companyName: 'Exemple SARL',
-          source: { reference: SOURCE_REF, retrievedAt: '2026-10-22T08:00:00Z' },
+          retrievedAt: '2026-10-22T08:00:00Z',
           matchedRecordId: RECORD_ID,
         },
         preconditions,
