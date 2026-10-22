@@ -35,26 +35,32 @@ Vérifier le socle :
 yarn lint && yarn typecheck && yarn test:unit
 ```
 
+Tests d'intégration, contre un serveur de test et avec sa clé dans l'environnement, jamais dans le dépôt :
+
+```bash
+UPSHIFT_API_KEY=<clé-de-l-espace-de-test> yarn test
+```
+
 Construire l'app et contrôler son manifeste :
 
 ```bash
-yarn twenty dev:build
+yarn upshift dev:build
 ```
 
 Relier la CLI à l'espace, avec l'adresse et la clé fournies par l'encadrement :
 
 ```bash
-yarn twenty remote:add --url <adresse-de-l-espace> --as ecc
+yarn upshift remote:add --url <adresse-de-l-espace> --as ecc
 ```
 
 Prévisualiser puis synchroniser :
 
 ```bash
-yarn twenty plan
+yarn upshift plan
 ```
 
 ```bash
-yarn twenty apply
+yarn upshift apply
 ```
 
 Renseignez ensuite la variable `TYPESAFE_API_KEY` dans les réglages de l'app. Elle n'est jamais écrite dans le dépôt.

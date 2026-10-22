@@ -11,7 +11,7 @@ Statuts : **présente et testée** · **présente mais non configurée** · **ab
 | Version d'Upshift déployée (l'app exige 2.49 ou plus) | à vérifier | | |
 | Accès de chaque membre, rôles attribués | à vérifier | | |
 | Droit d'installer une app (Applications) | à vérifier | | |
-| Clé d'API ou connexion de la CLI (`yarn twenty remote:add`) | à vérifier | | |
+| Clé d'API ou connexion de la CLI (`yarn upshift remote:add`) | à vérifier | | |
 | Budget d'essai des modèles confirmé par l'encadrement | à vérifier | | |
 
 ## CRM

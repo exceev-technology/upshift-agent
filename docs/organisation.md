@@ -44,7 +44,7 @@ Jours fériés : 6 nov. (Marche Verte) et 18 nov. (Fête de l'Indépendance). En
 
 - Une issue, une branche, une pull request. Branches : `feat/…`, `fix/…`, `docs/…`.
 - Messages de commit en anglais, à l'impératif (`feat: add score-prospect tool`).
-- Avant la revue : `yarn lint`, `yarn typecheck`, `yarn test:unit` et `yarn twenty dev:build` passent.
+- Avant la revue : `yarn lint`, `yarn typecheck`, `yarn test:unit` et `yarn upshift dev:build` passent.
 - Backlog : tableau simple (GitHub Projects ou Trello) — À faire / En cours / Terminé — partagé dans le canal.
 - Découpez en tâches de 1 à 2 jours. Bloqué plus d'une demi-journée : écrivez-le dans le canal.
 

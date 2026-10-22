@@ -10,12 +10,13 @@ permissions:
   contents: read
 
 env:
-  TWENTY_VERSION: latest
+  UPSHIFT_VERSION: latest
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# The test-instance action, its input and the CLI package keep their upstream SDK names.
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,10 +25,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Spawn Upshift test instance
-        id: twenty
+        id: upshift
         uses: twentyhq/twenty/.github/actions/spawn-twenty-app-dev-test@main
         with:
-          twenty-version: ${{ env.TWENTY_VERSION }}
+          twenty-version: ${{ env.UPSHIFT_VERSION }}
 
       - name: Enable Corepack
         run: corepack enable
@@ -56,5 +57,5 @@ jobs:
       - name: Run integration tests
         run: yarn test
         env:
-          TWENTY_API_URL: ${{ steps.twenty.outputs.server-url }}
-          TWENTY_API_KEY: ${{ steps.twenty.outputs.api-key }}
+          UPSHIFT_API_URL: ${{ steps.upshift.outputs.server-url }}
+          UPSHIFT_API_KEY: ${{ steps.upshift.outputs.api-key }}
