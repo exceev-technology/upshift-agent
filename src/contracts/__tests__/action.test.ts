@@ -46,7 +46,8 @@ const context = (overrides: Partial<ActionCheckContext> = {}): ActionCheckContex
   allowedActions: AGENTS.engagement.allowedActions,
   dossierRecordIds: new Set([RECORD_ID]),
   currentState: 'QUALIFIED',
-  executedIntentIds: new Set(),
+  executedIntents: new Map(),
+  allowedRecipients: new Set(['prospect@example.test']),
   verifiedEvidence: new Map([
     ['draft', new Set([DRAFT_NOTE_ID])],
     ['source', new Set([SOURCE_REF])],
@@ -116,13 +117,22 @@ describe('checkActionProposal', () => {
     expect(verdict).toMatchObject({ status: 'refused', reason: 'invalid-params' });
   });
 
-  it('does not repeat an intent that already ran', () => {
+  it('does not repeat an intent that already ran with the same content', () => {
     const verdict = checkActionProposal(
       taskProposal(),
-      context({ executedIntentIds: new Set(['intent-1']) }),
+      context({ executedIntents: new Map([['intent-1', hashActionContent(taskProposal())]]) }),
     );
 
     expect(verdict).toEqual({ status: 'already-done', intentId: 'intent-1' });
+  });
+
+  it('refuses an intent id already used for a different action', () => {
+    const verdict = checkActionProposal(
+      taskProposal(),
+      context({ executedIntents: new Map([['intent-1', 'hash-of-another-action']]) }),
+    );
+
+    expect(verdict).toMatchObject({ status: 'refused', reason: 'intent-conflict' });
   });
 
   it('refuses when required evidence is missing', () => {
@@ -197,7 +207,10 @@ describe('checkActionProposal', () => {
         },
         preconditions,
       });
-    const acquisition = context({ allowedActions: AGENTS.acquisition.allowedActions });
+    const acquisition = context({
+      allowedActions: AGENTS.acquisition.allowedActions,
+      deduplicationMatch: RECORD_ID,
+    });
 
     expect(checkActionProposal(match({ evidence: { source: SOURCE_REF } }), acquisition)).toMatchObject({
       status: 'refused',
@@ -207,6 +220,32 @@ describe('checkActionProposal', () => {
       checkActionProposal(match({ expectedState: 'QUALIFIED', evidence: { source: SOURCE_REF } }), acquisition)
         .status,
     ).toBe('ready');
+  });
+
+  it('refuses to create a company the server already matched', () => {
+    const duplicate = taskProposal({
+      actionId: 'crm.prospect.upsert',
+      params: { companyName: 'Exemple SARL', retrievedAt: '2026-10-22T08:00:00Z' },
+      preconditions: { evidence: { source: SOURCE_REF } },
+    });
+
+    expect(
+      checkActionProposal(
+        duplicate,
+        context({ allowedActions: AGENTS.acquisition.allowedActions, deduplicationMatch: RECORD_ID }),
+      ),
+    ).toMatchObject({ status: 'refused', reason: 'duplicate-mismatch' });
+  });
+
+  it('refuses a recipient outside the trusted test recipients', () => {
+    const realRecipient = sendProposal({
+      params: { recordId: RECORD_ID, channel: 'test', recipient: 'client@real-company.example', body: 'Bonjour' },
+    });
+
+    expect(checkActionProposal(realRecipient, context())).toMatchObject({
+      status: 'refused',
+      reason: 'recipient-not-allowed',
+    });
   });
 
   it('requires the stage proof only for a won or lost outcome', () => {

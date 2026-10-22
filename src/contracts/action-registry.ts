@@ -23,6 +23,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
     }),
     requiredEvidence: ['source'],
     targetRecordId: (params) => params.matchedRecordId,
+    // The match must equal the server's deduplication result, so a known company is never created twice.
+    deduplicated: true,
     requiresApproval: false,
   }),
   'crm.prospect.update-qualification': defineAction({
@@ -64,6 +66,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     }),
     requiredEvidence: ['draft'],
     targetRecordId: (params) => params.recordId,
+    recipient: (params) => params.recipient,
     requiresApproval: true,
   }),
   'crm.task.create': defineAction({

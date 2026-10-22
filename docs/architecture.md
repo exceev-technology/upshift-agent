@@ -45,7 +45,7 @@ La sortie d'un modèle n'est qu'une **proposition**. Le serveur la contrôle ava
 
 Une proposition porte l'identifiant d'action et sa version de schéma, les paramètres, les préconditions (état attendu, références des preuves) et un identifiant d'intention. Elle ne porte ni son identité ni sa propre approbation.
 
-Le contexte du contrôle vient uniquement de l'état du serveur : identité de l'exécution (organisation, délégant, agent, skill, modèle et leurs versions), délégation de l'agent, enregistrements et état courant du dossier, intentions déjà exécutées, références de preuves résolues dans le CRM et approbations enregistrées par les personnes habilitées. Le verdict reprend cette identité pour le journal.
+Le contexte du contrôle vient uniquement de l'état du serveur : identité de l'exécution (organisation, délégant, agent, skill, modèle et leurs versions), délégation de l'agent, enregistrements et état courant du dossier, intentions déjà exécutées avec leur contenu, résultat de la déduplication, destinataires de test, références de preuves résolues dans le CRM et approbations enregistrées par les personnes habilitées. Le verdict reprend cette identité pour le journal.
 
 `checkActionProposal` applique les contrôles dans cet ordre :
 
@@ -55,10 +55,12 @@ Le contexte du contrôle vient uniquement de l'état du serveur : identité de l
 | Action présente dans le registre | refus `unknown-action` |
 | Action non interdite | refus `forbidden-action`, même si un modèle ou un texte du CRM la recommande |
 | Action déléguée à l'agent | refus `not-delegated` |
-| Intention pas encore exécutée | `already-done` : un événement rejoué ne produit pas un second effet |
+| Intention pas encore exécutée, ou rejouée à l'identique | `already-done` : un événement rejoué ne produit pas un second effet ; refus `intent-conflict` si l'identifiant a servi à une autre action |
 | Version du schéma | refus `schema-version-mismatch` |
 | Paramètres valides (zod, à l'exécution) | refus `invalid-params` |
+| Rapprochement conforme à la déduplication du serveur | refus `duplicate-mismatch` : une entreprise connue n'est jamais recréée |
 | Enregistrement visé appartenant au dossier contrôlé | refus `target-mismatch` |
+| Destinataire figurant parmi les destinataires de test | refus `recipient-not-allowed` |
 | Preuves requises pour ces paramètres présentes (la pièce d'issue n'est exigée que pour « gagnée » ou « perdue ») | refus `missing-evidence` |
 | Chaque référence de preuve résolue par le serveur dans le dossier, pour ce type de preuve | refus `unverified-evidence` |
 | État attendu fourni pour toute modification d'un dossier existant, y compris un prospect rapproché | refus `missing-precondition` |

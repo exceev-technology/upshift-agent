@@ -23,6 +23,10 @@ export type ActionDefinition = {
   // The existing record these parameters change, if any. It must belong to the checked dossier, and the
   // proposal must then name the dossier state it expects.
   targetRecordId: (params: unknown) => string | undefined;
+  // The target must then equal the match found by the server's deduplication (none for a creation).
+  deduplicated: boolean;
+  // External recipient, which must be one of the trusted test recipients.
+  recipient: (params: unknown) => string | undefined;
   requiresApproval: boolean;
 };
 
@@ -40,9 +44,11 @@ export const defineAction = <TSchema extends z.ZodType>(definition: {
   requiredEvidence: Requirement<z.infer<TSchema>, string[]>;
   // Omit for an action that only creates records.
   targetRecordId?: (params: z.infer<TSchema>) => string | undefined;
+  deduplicated?: boolean;
+  recipient?: (params: z.infer<TSchema>) => string | undefined;
   requiresApproval: boolean;
 }): ActionDefinition => {
-  const { requiredEvidence, targetRecordId } = definition;
+  const { requiredEvidence, targetRecordId, recipient } = definition;
 
   // Only called with parameters already validated by `params`.
   return {
@@ -50,6 +56,8 @@ export const defineAction = <TSchema extends z.ZodType>(definition: {
     requiredEvidence: (params) =>
       typeof requiredEvidence === 'function' ? requiredEvidence(params as z.infer<TSchema>) : requiredEvidence,
     targetRecordId: (params) => targetRecordId?.(params as z.infer<TSchema>),
+    deduplicated: definition.deduplicated ?? false,
+    recipient: (params) => recipient?.(params as z.infer<TSchema>),
   };
 };
 
@@ -96,7 +104,10 @@ export type ActionRefusalReason =
   | 'not-delegated'
   | 'schema-version-mismatch'
   | 'invalid-params'
+  | 'intent-conflict'
+  | 'duplicate-mismatch'
   | 'target-mismatch'
+  | 'recipient-not-allowed'
   | 'missing-evidence'
   | 'unverified-evidence'
   | 'missing-precondition'
@@ -133,7 +144,12 @@ export type ActionCheckContext = {
   // Records of the dossier whose state and evidence were loaded (company, people, opportunity…).
   dossierRecordIds: ReadonlySet<string>;
   currentState?: string;
-  executedIntentIds: ReadonlySet<string>;
+  // Intents already executed, with the content hash each one ran with.
+  executedIntents: ReadonlyMap<string, string>;
+  // The existing record the server's deduplication matched for this proposal, if any.
+  deduplicationMatch?: string;
+  // Test recipients allowed on the test channel, lower-cased.
+  allowedRecipients: ReadonlySet<string>;
   // References the server resolved in the CRM, per evidence key: they exist, belong to the dossier and have
   // the kind that key expects. A reference verified for one key never counts for another.
   verifiedEvidence: ReadonlyMap<string, ReadonlySet<string>>;
@@ -156,7 +172,7 @@ const stableStringify = (value: unknown): string => {
   return JSON.stringify(value);
 };
 
-// An approval is bound to the exact content and intent: any change needs a new approval.
+// Binds approvals and replays to the exact content and intent: any change needs a new approval.
 export const hashActionContent = (
   proposal: Pick<ActionProposal, 'actionId' | 'schemaVersion' | 'params' | 'intentId'>,
 ) =>
@@ -197,9 +213,6 @@ export const checkActionProposal = (
   if (!context.allowedActions.includes(action.id)) {
     return refuse('not-delegated', `${action.id} ne fait pas partie de la délégation de l'agent`);
   }
-  if (context.executedIntentIds.has(proposal.intentId)) {
-    return { status: 'already-done', intentId: proposal.intentId };
-  }
   if (proposal.schemaVersion !== action.schemaVersion) {
     return refuse(
       'schema-version-mismatch',
@@ -213,11 +226,33 @@ export const checkActionProposal = (
     return refuse('invalid-params', describeIssues(parsed.error));
   }
 
-  // State and evidence were checked for one dossier: the action may only change a record of that dossier.
+  // A replay runs nothing twice, and an intent never covers a different action.
+  const contentHash = hashActionContent({ ...proposal, params: parsed.data });
+  const executedHash = context.executedIntents.get(proposal.intentId);
+
+  if (executedHash !== undefined) {
+    return executedHash === contentHash
+      ? { status: 'already-done', intentId: proposal.intentId }
+      : refuse('intent-conflict', `L'intention ${proposal.intentId} a déjà servi à une autre action`);
+  }
+
   const target = action.targetRecordId(parsed.data);
 
+  if (action.deduplicated && target !== context.deduplicationMatch) {
+    return refuse(
+      'duplicate-mismatch',
+      `Le serveur a rapproché ${context.deduplicationMatch ?? 'aucune fiche'}, la proposition ${target ?? 'aucune fiche'}`,
+    );
+  }
+  // State and evidence were checked for one dossier: the action may only change a record of that dossier.
   if (target !== undefined && !context.dossierRecordIds.has(target)) {
     return refuse('target-mismatch', `${target} n'appartient pas au dossier contrôlé`);
+  }
+
+  const recipient = action.recipient(parsed.data);
+
+  if (recipient !== undefined && !context.allowedRecipients.has(recipient.toLowerCase())) {
+    return refuse('recipient-not-allowed', `${recipient} n'est pas un destinataire de test autorisé`);
   }
 
   const { evidence, expectedState } = proposal.preconditions;
@@ -251,7 +286,6 @@ export const checkActionProposal = (
     return { status: 'ready', action, params: parsed.data, identity: context.identity };
   }
 
-  const contentHash = hashActionContent(proposal);
   const approval = context.approvals.get(contentHash);
 
   if (approval === undefined) {
