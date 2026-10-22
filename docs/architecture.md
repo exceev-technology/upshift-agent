@@ -61,10 +61,13 @@ Le contexte du contrôle vient uniquement de l'état du serveur : identité de l
 | Rapprochement conforme à la déduplication du serveur | refus `duplicate-mismatch` : une entreprise connue n'est jamais recréée |
 | Enregistrement visé appartenant au dossier contrôlé | refus `target-mismatch` |
 | Destinataire figurant parmi les destinataires de test | refus `recipient-not-allowed` |
+| Responsable de la tâche parmi les membres autorisés | refus `assignee-not-allowed` |
 | Preuves requises pour ces paramètres présentes (la pièce d'issue n'est exigée que pour « gagnée » ou « perdue ») | refus `missing-evidence` |
 | Chaque référence de preuve résolue par le serveur dans le dossier, pour ce type de preuve | refus `unverified-evidence` |
+| Preuve attestant ce que la proposition affirme (issue, score, texte du brouillon) | refus `evidence-mismatch` |
 | État attendu fourni pour toute modification d'un dossier existant, y compris un prospect rapproché | refus `missing-precondition` |
 | État du dossier inchangé | refus `stale-state` : conflit visible |
+| Action permise dans cet état (aucune relance après un refus de contact) | refus `state-not-allowed` |
 | Approbation enregistrée pour ce contenu exact et cette intention | `awaiting-approval` ; toute modification exige une nouvelle approbation |
 
 Catégories d'action (§13) : `consultation`, `bounded-change` (modification bornée), `external-contact`, `commercial-commitment`, `forbidden`. Le registre initial (`src/contracts/action-registry.ts`) couvre le cycle commercial ; ses paramètres sont un premier jet à affiner avec le processus métier.

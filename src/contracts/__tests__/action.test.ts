@@ -6,12 +6,13 @@ import {
   type ActionIdentity,
   type ActionProposal,
 } from 'src/contracts/action';
-import { ACTION_REGISTRY } from 'src/contracts/action-registry';
+import { ACTION_REGISTRY, CONTACT_REFUSED } from 'src/contracts/action-registry';
 import { describe, expect, it } from 'vitest';
 
 const RECORD_ID = '0f8a4c7e-3b2d-4e6f-9a1b-2c3d4e5f6a7b';
 const DRAFT_NOTE_ID = '6d1e2f3a-4b5c-4d7e-8f9a-0b1c2d3e4f5a';
 const SOURCE_REF = 'corpus-essai#12';
+const OWNER_ID = '5e6f7a8b-9c0d-4e1f-8a2b-3c4d5e6f7a8b';
 
 const identity: ActionIdentity = {
   workspaceId: 'workspace-test',
@@ -48,10 +49,12 @@ const context = (overrides: Partial<ActionCheckContext> = {}): ActionCheckContex
   currentState: 'QUALIFIED',
   executedIntents: new Map(),
   allowedRecipients: new Set(['prospect@example.test']),
-  verifiedEvidence: new Map([
-    ['draft', new Set([DRAFT_NOTE_ID])],
-    ['source', new Set([SOURCE_REF])],
+  // Each verified reference with the value it attests.
+  verifiedEvidence: new Map<string, ReadonlyMap<string, unknown>>([
+    ['draft', new Map([[DRAFT_NOTE_ID, 'Bonjour']])],
+    ['source', new Map([[SOURCE_REF, { kind: 'corpus' }]])],
   ]),
+  allowedAssigneeIds: new Set([OWNER_ID]),
   approvals: new Map(),
   ...overrides,
 });
@@ -248,6 +251,58 @@ describe('checkActionProposal', () => {
     });
   });
 
+  it('accepts a won stage only with a proof that records a win', () => {
+    const toWon = taskProposal({
+      actionId: 'crm.opportunity.update-stage',
+      params: { opportunityId: RECORD_ID, stage: 'WON' },
+      preconditions: { expectedState: 'QUALIFIED', evidence: { stageProof: 'proof-1' } },
+    });
+    const withProof = (outcome: string) =>
+      context({
+        allowedActions: AGENTS.deals.allowedActions,
+        verifiedEvidence: new Map([['stageProof', new Map([['proof-1', outcome]])]]),
+      });
+
+    expect(checkActionProposal(toWon, withProof('WON')).status).toBe('ready');
+    expect(checkActionProposal(toWon, withProof('LOST'))).toMatchObject({
+      status: 'refused',
+      reason: 'evidence-mismatch',
+    });
+  });
+
+  it('refuses a message whose text differs from the verified draft', () => {
+    const altered = sendProposal({
+      params: { recordId: RECORD_ID, channel: 'test', recipient: 'prospect@example.test', body: 'Texte modifié' },
+    });
+
+    expect(checkActionProposal(altered, context())).toMatchObject({
+      status: 'refused',
+      reason: 'evidence-mismatch',
+    });
+  });
+
+  it('stops follow-ups once the prospect refused contact', () => {
+    const followUp = taskProposal({ preconditions: { expectedState: CONTACT_REFUSED, evidence: {} } });
+
+    expect(checkActionProposal(followUp, context({ currentState: CONTACT_REFUSED }))).toMatchObject({
+      status: 'refused',
+      reason: 'state-not-allowed',
+    });
+  });
+
+  it('assigns tasks only to authorised members', () => {
+    const assignTo = (assigneeId: string) =>
+      taskProposal({
+        params: { recordId: RECORD_ID, title: 'Relancer le prospect', dueAt: '2026-11-05T09:00:00Z', assigneeId },
+      });
+
+    expect(checkActionProposal(assignTo(OWNER_ID), context()).status).toBe('ready');
+    expect(checkActionProposal(assignTo('9f8e7d6c-5b4a-4c3d-8e2f-1a0b9c8d7e6f'), context())).toMatchObject({
+      status: 'refused',
+      reason: 'assignee-not-allowed',
+    });
+  });
+
   it('requires the stage proof only for a won or lost outcome', () => {
     const toStage = (stage: string) =>
       taskProposal({
@@ -305,9 +360,16 @@ describe('checkActionProposal', () => {
       params: { recordId: RECORD_ID, channel: 'test', recipient: 'prospect@example.test', body: 'Autre texte' },
     });
 
-    expect(checkActionProposal(edited, context({ approvals: approvalFor(sendProposal()) })).status).toBe(
-      'awaiting-approval',
-    );
+    const editedDraft = new Map<string, ReadonlyMap<string, unknown>>([
+      ['draft', new Map([[DRAFT_NOTE_ID, 'Autre texte']])],
+    ]);
+
+    expect(
+      checkActionProposal(
+        edited,
+        context({ approvals: approvalFor(sendProposal()), verifiedEvidence: editedDraft }),
+      ).status,
+    ).toBe('awaiting-approval');
   });
 });
 

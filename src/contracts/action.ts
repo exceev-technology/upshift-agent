@@ -20,6 +20,10 @@ export type ActionDefinition = {
   params: z.ZodType;
   // Evidence keys the proposal must carry for these (validated) parameters.
   requiredEvidence: (params: unknown) => string[];
+  // What each evidence key must attest for these parameters, e.g. the outcome a stage proof records.
+  evidenceClaims: (params: unknown) => Record<string, unknown>;
+  // Dossier states in which the action must not run, e.g. after a contact refusal.
+  blockedStates: readonly string[];
   // The existing record these parameters change, if any. It must belong to the checked dossier, and the
   // proposal must then name the dossier state it expects.
   targetRecordId: (params: unknown) => string | undefined;
@@ -27,6 +31,8 @@ export type ActionDefinition = {
   deduplicated: boolean;
   // External recipient, which must be one of the trusted test recipients.
   recipient: (params: unknown) => string | undefined;
+  // Workspace member the action assigns work to, which must be an authorised assignee.
+  assignee: (params: unknown) => string | undefined;
   requiresApproval: boolean;
 };
 
@@ -42,22 +48,28 @@ export const defineAction = <TSchema extends z.ZodType>(definition: {
   description: string;
   params: TSchema;
   requiredEvidence: Requirement<z.infer<TSchema>, string[]>;
+  evidenceClaims?: (params: z.infer<TSchema>) => Record<string, unknown>;
+  blockedStates?: readonly string[];
   // Omit for an action that only creates records.
   targetRecordId?: (params: z.infer<TSchema>) => string | undefined;
   deduplicated?: boolean;
   recipient?: (params: z.infer<TSchema>) => string | undefined;
+  assignee?: (params: z.infer<TSchema>) => string | undefined;
   requiresApproval: boolean;
 }): ActionDefinition => {
-  const { requiredEvidence, targetRecordId, recipient } = definition;
+  const { requiredEvidence, evidenceClaims, targetRecordId, recipient, assignee } = definition;
 
   // Only called with parameters already validated by `params`.
   return {
     ...definition,
     requiredEvidence: (params) =>
       typeof requiredEvidence === 'function' ? requiredEvidence(params as z.infer<TSchema>) : requiredEvidence,
+    evidenceClaims: (params) => evidenceClaims?.(params as z.infer<TSchema>) ?? {},
+    blockedStates: definition.blockedStates ?? [],
     targetRecordId: (params) => targetRecordId?.(params as z.infer<TSchema>),
     deduplicated: definition.deduplicated ?? false,
     recipient: (params) => recipient?.(params as z.infer<TSchema>),
+    assignee: (params) => assignee?.(params as z.infer<TSchema>),
   };
 };
 
@@ -108,6 +120,9 @@ export type ActionRefusalReason =
   | 'duplicate-mismatch'
   | 'target-mismatch'
   | 'recipient-not-allowed'
+  | 'assignee-not-allowed'
+  | 'evidence-mismatch'
+  | 'state-not-allowed'
   | 'missing-evidence'
   | 'unverified-evidence'
   | 'missing-precondition'
@@ -150,9 +165,11 @@ export type ActionCheckContext = {
   deduplicationMatch?: string;
   // Test recipients allowed on the test channel, lower-cased.
   allowedRecipients: ReadonlySet<string>;
-  // References the server resolved in the CRM, per evidence key: they exist, belong to the dossier and have
-  // the kind that key expects. A reference verified for one key never counts for another.
-  verifiedEvidence: ReadonlyMap<string, ReadonlySet<string>>;
+  // Workspace members work may be assigned to, e.g. the dossier owner.
+  allowedAssigneeIds: ReadonlySet<string>;
+  // References the server resolved in the CRM, per evidence key, with the value each one attests (the
+  // outcome of a stage proof, the text of a draft…). A reference verified for one key never counts for another.
+  verifiedEvidence: ReadonlyMap<string, ReadonlyMap<string, unknown>>;
   // Approvals recorded by authorised members, keyed by the content hash they approved.
   approvals: ReadonlyMap<string, ActionApproval>;
 };
@@ -255,6 +272,12 @@ export const checkActionProposal = (
     return refuse('recipient-not-allowed', `${recipient} n'est pas un destinataire de test autorisé`);
   }
 
+  const assignee = action.assignee(parsed.data);
+
+  if (assignee !== undefined && !context.allowedAssigneeIds.has(assignee)) {
+    return refuse('assignee-not-allowed', `${assignee} ne peut pas recevoir de tâche sur ce dossier`);
+  }
+
   const { evidence, expectedState } = proposal.preconditions;
   const missingEvidence = action.requiredEvidence(parsed.data).filter((key) => !evidence[key]);
 
@@ -272,6 +295,19 @@ export const checkActionProposal = (
       `Preuves introuvables dans le dossier : ${unverifiedEvidence.map(([key]) => key).join(', ')}`,
     );
   }
+
+  // A proof must attest what the proposal claims, e.g. a lost outcome never authorises a won stage.
+  const contradictedEvidence = Object.entries(action.evidenceClaims(parsed.data)).filter(
+    ([key, claim]) =>
+      stableStringify(context.verifiedEvidence.get(key)?.get(evidence[key] ?? '')) !== stableStringify(claim),
+  );
+
+  if (contradictedEvidence.length > 0) {
+    return refuse(
+      'evidence-mismatch',
+      `Preuves en contradiction avec la proposition : ${contradictedEvidence.map(([key]) => key).join(', ')}`,
+    );
+  }
   if (target !== undefined && expectedState === undefined) {
     return refuse('missing-precondition', `${action.id} modifie un dossier existant : état attendu requis`);
   }
@@ -280,6 +316,9 @@ export const checkActionProposal = (
       'stale-state',
       `État attendu ${expectedState}, état courant ${context.currentState ?? 'inconnu'}`,
     );
+  }
+  if (context.currentState !== undefined && action.blockedStates.includes(context.currentState)) {
+    return refuse('state-not-allowed', `${action.id} est interdite dans l'état ${context.currentState}`);
   }
 
   if (!action.requiresApproval) {

@@ -4,6 +4,9 @@ import { defineAction, type ActionRegistry } from 'src/contracts/action';
 
 const recordId = z.uuid();
 
+// Dossier state recorded when a prospect refuses contact: every follow-up stops (brief §13).
+export const CONTACT_REFUSED = 'CONTACT_REFUSED';
+
 // Starter registry for the commercial cycle. Parameters and evidence are a first draft from the
 // brief (§10, §12); refine them with the business process before implementing each tool.
 export const ACTION_REGISTRY: ActionRegistry = {
@@ -40,6 +43,10 @@ export const ACTION_REGISTRY: ActionRegistry = {
       missingInformation: z.array(z.string()),
     }),
     requiredEvidence: ['scoring'],
+    // The recorded score is the one the verified scoring artifact holds, never a model-supplied value.
+    evidenceClaims: (params) => ({
+      scoring: { priorityScore: params.priorityScore, gridVersion: params.gridVersion },
+    }),
     targetRecordId: (params) => params.recordId,
     requiresApproval: false,
   }),
@@ -50,6 +57,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     description: "Enregistrer un brouillon de message sur le dossier, sans l'envoyer.",
     params: z.object({ recordId, channel: z.literal('test'), body: z.string().min(1) }),
     requiredEvidence: [],
+    blockedStates: [CONTACT_REFUSED],
     targetRecordId: (params) => params.recordId,
     requiresApproval: false,
   }),
@@ -65,6 +73,9 @@ export const ACTION_REGISTRY: ActionRegistry = {
       body: z.string().min(1),
     }),
     requiredEvidence: ['draft'],
+    // The text sent is exactly the text of the verified draft.
+    evidenceClaims: (params) => ({ draft: params.body }),
+    blockedStates: [CONTACT_REFUSED],
     targetRecordId: (params) => params.recordId,
     recipient: (params) => params.recipient,
     requiresApproval: true,
@@ -81,7 +92,9 @@ export const ACTION_REGISTRY: ActionRegistry = {
       assigneeId: recordId.optional(),
     }),
     requiredEvidence: [],
+    blockedStates: [CONTACT_REFUSED],
     targetRecordId: (params) => params.recordId,
+    assignee: (params) => params.assigneeId,
     requiresApproval: false,
   }),
   'deals.proposal.prepare': defineAction({
@@ -103,6 +116,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       discountPercent: z.number().min(0).max(100),
     }),
     requiredEvidence: ['qualifiedNeed'],
+    blockedStates: [CONTACT_REFUSED],
     targetRecordId: (params) => params.opportunityId,
     requiresApproval: true,
   }),
@@ -115,8 +129,10 @@ export const ACTION_REGISTRY: ActionRegistry = {
       opportunityId: recordId,
       stage: z.enum(['MEETING', 'PROPOSAL', 'WON', 'LOST', 'DEFERRED']),
     }),
-    // Only a terminal outcome needs its proof; ordinary progression does not.
+    // Only a terminal outcome needs its proof, and the proof must record that same outcome.
     requiredEvidence: (params) => (params.stage === 'WON' || params.stage === 'LOST' ? ['stageProof'] : []),
+    evidenceClaims: (params) =>
+      params.stage === 'WON' || params.stage === 'LOST' ? { stageProof: params.stage } : {},
     targetRecordId: (params) => params.opportunityId,
     requiresApproval: false,
   }),
