@@ -1,0 +1,51 @@
+{
+  "name": "upshift-agent",
+  "version": "0.1.0",
+  "description": "Agents et skills autonomes pour Upshift, avec le CRM comme cas d'application (Projet Innovation ECC 2026, sujet 01).",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "Exceev Technology",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exceev-technology/upshift-agent.git"
+  },
+  "engines": {
+    "node": "^24.5.0",
+    "npm": "please-use-yarn",
+    "yarn": ">=4.0.2",
+    "twenty": ">=2.49.0"
+  },
+  "keywords": [
+    "upshift",
+    "agents",
+    "skills",
+    "crm"
+  ],
+  "packageManager": "yarn@4.13.0",
+  "scripts": {
+    "twenty": "twenty",
+    "lint": "oxlint -c .oxlintrc.json .",
+    "lint:fix": "oxlint --fix -c .oxlintrc.json .",
+    "typecheck": "tsgo --noEmit -p tsconfig.spec.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run --config vitest.unit.config.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "@types/react": "^19.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260116.1",
+    "oxlint": "^0.16.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "twenty-client-sdk": "2.49.0",
+    "twenty-sdk": "2.49.0",
+    "twenty-ui": "2.49.0",
+    "typescript": "^5.9.3",
+    "vite-tsconfig-paths": "^4.2.1",
+    "vitest": "^4.0.0"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}
