@@ -8,7 +8,8 @@ Statuts : **présente et testée** · **présente mais non configurée** · **ab
 
 | Brique | Statut | Preuve | Responsable |
 | --- | --- | --- | --- |
-| Version d'Upshift déployée (l'app exige 2.49 ou plus) | à vérifier | | |
+| Version d'Upshift déployée (l'app exige 2.47 ou plus) | présente et testée | 2.47.0, lue sur `/client-config` le 22 oct. | |
+| Adresses de connexion publiées en https (`SERVER_URL` du déploiement) | présente mais non configurée | Les métadonnées OAuth annoncent `http://` ; la connexion de la CLI par navigateur échoue (22 oct.) | |
 | Accès de chaque membre, rôles attribués | à vérifier | | |
 | Droit d'installer une app (Applications) | à vérifier | | |
 | Clé d'API ou connexion de la CLI (`yarn upshift remote:add`) | à vérifier | | |

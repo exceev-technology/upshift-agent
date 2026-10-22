@@ -10,7 +10,8 @@ permissions:
   contents: read
 
 env:
-  UPSHIFT_VERSION: latest
+  # Same version as the ECC Upshift Agents workspace.
+  UPSHIFT_VERSION: v2.47.0
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -40,7 +41,8 @@ jobs:
           cache: yarn
 
       - name: Install the Upshift CLI
-        run: npm install -g twenty@2.49.0
+        # Newest CLI release not above the workspace version (there is no 2.47.0).
+        run: npm install -g twenty@2.46.0
 
       - name: Install dependencies
         run: yarn install --immutable

@@ -88,7 +88,7 @@ Dans Upshift, le modèle d'un agent se choisit avec `modelId` parmi les fourniss
 
 Ces points dépendent de l'espace ou de fonctions encore en alpha ; reportez le résultat dans [l'audit](audit-upshift-v1.md).
 
-- La version d'Upshift déployée : l'app exige au moins **2.49**.
+- La version d'Upshift déployée : l'app exige au moins **2.47** (version de l'espace le 22 octobre).
 - La façon dont un agent utilise les skills de l'app (chargement, sélection).
 - L'effet de `canAccessAllTools` sur l'accès des agents aux outils de l'app.
 - Le format de `modelId` et les fournisseurs disponibles dans l'espace.
