@@ -4,7 +4,7 @@ Agents et skills autonomes pour les processus de l'entreprise, construits comme 
 
 Projet Innovation ECC 2026 · Sujet 01 · Exceev Technology. Soutenance du MVP le 8 décembre 2026.
 
-> **Statut : socle initialisé.** Le catalogue, les rôles, le contrat d'action et l'adaptateur Jev compilent et passent leurs tests unitaires. Rien n'a encore été synchronisé ni testé sur l'espace ECC Upshift Agents ; aucun appel réel à Jev n'a été effectué.
+> **Statut : socle installé.** Le catalogue, les rôles et le contrat d'action compilent et passent leurs tests unitaires. L'app est installée sur l'espace ECC Upshift Agents (22 octobre) ; aucun modèle n'y est encore appelé.
 
 ## Contenu
 
@@ -14,7 +14,7 @@ Projet Innovation ECC 2026 · Sujet 01 · Exceev Technology. Soutenance du MVP l
 | 8 skills réutilisables, S1 à S8 (S3 et S4 partagés) | `src/skills/`, `src/catalog/skills.ts` | prévu |
 | Rôle de l'application et délégation de chaque agent | `src/roles/` | prévu |
 | Contrat d'action typé, contrôlé avant exécution | `src/contracts/` | testé en unitaire |
-| Adaptateur Jev : client, simulateur, scoring | `src/models/jev/` | simulé |
+| Jev (TypeSafe AI) et modèles génératifs | fournisseurs IA de l'espace, `src/models/providers.ts` | à activer |
 | Outils, déclencheurs, objets CRM, supervision | — | à construire |
 
 Détails : [architecture](docs/architecture.md) · [catalogue](docs/catalogue.md) · [sujet complet](docs/sujet/upshift-ecc-2026-sujet-01-agents-autonomes.md).
@@ -63,14 +63,14 @@ yarn upshift plan
 yarn upshift apply
 ```
 
-Renseignez ensuite la variable `TYPESAFE_API_KEY` dans les réglages de l'app. Elle n'est jamais écrite dans le dépôt.
+Activez ensuite les fournisseurs IA (dont TypeSafe AI pour Jev) avec leur clé dans les réglages IA de l'espace. Aucune clé n'est écrite dans le dépôt.
 
 ## Documentation
 
 | Document | Pour |
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | Règles du projet et du SDK, commandes, Definition of Done |
-| [docs/architecture.md](docs/architecture.md) | Chaîne d'exécution, contrat d'action, Jev, modèles |
+| [docs/architecture.md](docs/architecture.md) | Chaîne d'exécution, contrat d'action, fournisseurs IA |
 | [docs/catalogue.md](docs/catalogue.md) | Agents, skills, réutilisations, paramètres métier |
 | [docs/audit-upshift-v1.md](docs/audit-upshift-v1.md) | Grille d'audit du Sprint 1 |
 | [docs/cas-usage.md](docs/cas-usage.md) | Fiche de cas d'usage et priorisation |

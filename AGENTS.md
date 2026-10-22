@@ -7,7 +7,7 @@ Ce fichier est la source d'instructions commune. `CLAUDE.md` l'importe ; les aut
 ## À lire avant de modifier le code
 
 1. [Le sujet](docs/sujet/upshift-ecc-2026-sujet-01-agents-autonomes.md) : cadrage complet, critères de recette.
-2. [L'architecture](docs/architecture.md) : correspondance entre le sujet et le code, contrat d'action, Jev.
+2. [L'architecture](docs/architecture.md) : correspondance entre le sujet et le code, contrat d'action, fournisseurs IA.
 3. [Le catalogue](docs/catalogue.md) : quatre agents, huit skills, réutilisations.
 
 ## Règles du projet
@@ -15,7 +15,7 @@ Ce fichier est la source d'instructions commune. `CLAUDE.md` l'importe ; les aut
 - **Tout s'appelle Upshift** : le produit, les commandes (`yarn upshift …`), les variables (`UPSHIFT_…`), les libellés, prompts, contenus de skills, messages, documentation et commits. Seuls les noms imposés par le SDK amont restent tels quels : noms des paquets npm et leurs imports, variables lues par le SDK lui-même (associées une seule fois dans `vitest.config.ts`), dossier de build et action de CI amont. Ne les renommez pas, ne les reprenez pas dans un texte.
 - **Langues.** Documentation, libellés, prompts et contenus de skills en français. Code, identifiants et messages de commit en anglais.
 - **Données.** Données fictives ou anonymisées, corpus de prospects autorisé, destinataires de test uniquement. Une affaire « gagnée » dans la démo n'est jamais présentée comme une vente réelle.
-- **Secrets.** Aucune clé, aucun jeton, aucun mot de passe dans le code, la configuration, les tests ou Slack, pas même une valeur par défaut. Les clés passent par l'environnement (`UPSHIFT_API_KEY` pour les tests d'intégration) ou par les variables de l'application (`TYPESAFE_API_KEY`), renseignées dans l'espace.
+- **Secrets.** Aucune clé, aucun jeton, aucun mot de passe dans le code, la configuration, les tests ou Slack, pas même une valeur par défaut. Les clés passent par l'environnement (`UPSHIFT_API_KEY` pour les tests d'intégration) ; celles des fournisseurs IA se renseignent dans les réglages IA de l'espace.
 - **Statut honnête.** Chaque capacité est *prévue*, *simulée*, *testée* ou *disponible* (champ `status` du catalogue). Un simulateur ne valide jamais une intégration réelle.
 - **Pas de succès fictif.** Une panne, un budget épuisé ou une donnée manquante produit un état explicite.
 
@@ -23,7 +23,7 @@ Ce fichier est la source d'instructions commune. `CLAUDE.md` l'importe ; les aut
 
 ```
 src/
-  application-config.ts      Application, logo et variables (TYPESAFE_API_KEY, JEV_MODEL)
+  application-config.ts      Application et logo
   constants/                 Identifiants universels : permanents, un par entité
   catalog/                   Source de vérité des contrats de skills et des fiches d'agents
     types.ts                 Contrat minimum d'un skill (§09), fiche d'un agent (§07)
@@ -34,8 +34,7 @@ src/
   agents/                    Une entité defineAgent par agent, liée à son rôle
   roles/                     Rôle de l'application (plafond) et délégation de chaque agent
   contracts/                 Contrat d'action typé, contrôles avant exécution, registre des actions
-  models/jev/                Adaptateur Jev (TypeSafe) : client HTTP, simulateur, scoring
-  models/providers.ts        Fournisseurs génératifs visés et leur statut
+  models/providers.ts        Fournisseurs IA de l'espace (dont TypeSafe AI pour Jev) et leur statut
   logic-functions/           Fonctions (outils des agents, déclencheurs) ; health check
 ```
 
@@ -57,9 +56,8 @@ src/
 
 ## Jev et les modèles
 
-- `createJevClientFromEnv()` lit `TYPESAFE_API_KEY` et `JEV_MODEL`. Toute erreur devient une `JevError` typée (`not-configured`, `unauthorized`, `invalid-request`, `unavailable`, `invalid-response`) : enregistrez l'état, ne masquez jamais l'erreur.
-- Une réponse hors des critères de la question (choix inconnu, score hors échelle) est rejetée comme `invalid-response`.
-- `createSimulatedJevClient()` débloque le développement ; ses résultats sont marqués `simulated`.
+- Jev et les modèles génératifs passent par les fournisseurs IA intégrés à l'espace (réglages IA : Anthropic, Google, Mistral, OpenAI, TypeSafe AI, xAI), activés avec leur clé. Un agent choisit son modèle avec `modelId` ; le code de l'app n'appelle aucune API de modèle directement.
+- Jev (fournisseur TypeSafe AI) sert aux décisions bornées : classer (Choice), évaluer (Score), vérifier (Noul). Une réponse hors des critères de la question n'est jamais utilisée ; une panne du fournisseur produit un état explicite.
 - Un score de priorité n'est pas une probabilité de signature. Une confiance élevée ne remplace jamais une permission ou une validation obligatoire.
 
 ## Commandes

@@ -1,7 +1,7 @@
 import type { AgentCard, AgentKey } from 'src/catalog/types';
 
-const DECISION_MODEL = 'Jev (TypeSafe) pour les décisions bornées';
-const GENERATION_MODEL = "Modèle par défaut de l'espace, à choisir et comparer (§12)";
+const DECISION_MODEL = "Jev, via le fournisseur TypeSafe AI de l'espace, pour les décisions bornées";
+const GENERATION_MODEL = "Modèle d'un fournisseur de l'espace, à choisir et comparer (§12)";
 
 // The four agents proposed by the brief (§08). Action identifiers refer to src/contracts/action-registry.ts.
 export const AGENTS: Record<AgentKey, AgentCard> = {

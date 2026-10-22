@@ -35,9 +35,9 @@ La sortie d'un modèle n'est qu'une **proposition**. Le serveur la contrôle ava
 | Déclencheurs (§05) | fonctions : événement de base de données, planification, route ; `runAgent()` | `src/logic-functions/` | à créer |
 | CRM amélioré (§05) | `defineObject`, `defineField`, `defineView` | `src/objects/`, `src/fields/`, `src/views/` | à créer |
 | Supervision (§07) | vues, pages, composants d'interface | à définir | à créer |
-| Jev (§11) | appel HTTP depuis une fonction | `src/models/jev/` | simulé |
+| Jev (§11) | fournisseur TypeSafe AI de l'espace, choisi par `modelId` | réglages IA de l'espace | prévu |
 | Modèles génératifs (§12) | `modelId` de l'agent, réglages IA de l'espace | `src/models/providers.ts` | prévu |
-| Secrets | variables de l'application | `src/application-config.ts` | prévu |
+| Clés des fournisseurs IA | réglages IA de l'espace, jamais dans le dépôt | — | à activer |
 
 **Pourquoi les contrats vivent dans `src/catalog/`.** Le SDK ne relie pas explicitement un agent à ses skills (fonction encore en alpha). Le prompt de chaque agent est donc généré depuis sa fiche et cite chaque skill avec sa version : la même version et le même contrat apparaissent dans tous les agents qui l'utilisent, ce que demande la recette « Réutilisation ».
 
@@ -74,15 +74,14 @@ Catégories d'action (§13) : `consultation`, `bounded-change` (modification bor
 | Évaluer | Score | Adéquation au profil, pertinence du besoin, signal d'intention, temporalité |
 | Vérifier | Noul | La réponse contient-elle une demande de rendez-vous ? |
 
-- **Appel** : `POST https://api.typesafe.ai/v1/systemone`, clé dans la variable `TYPESAFE_API_KEY`, modèle dans `JEV_MODEL` (`jev-latest` par défaut). La réponse est validée à l'exécution, y compris contre les critères de chaque question : un choix inconnu ou un score hors échelle est rejeté.
-- **Score** : les niveaux sont décrits du plus bas au plus haut ; Jev renvoie la moyenne des indices pondérée par les probabilités. Conversion : `score / (niveaux − 1) × 100` ; un score hors de l'échelle est refusé, jamais ramené à 100.
-- **Priorité** : `combinePriority` pondère les dimensions évaluées avec les poids versionnés de la grille. Une dimension inconnue est exclue et signalée, jamais comptée comme nulle ; la couverture et la confiance la plus basse sont affichées à côté.
-- **Seuils** : `decideOnConfidence` renvoie agir, vérifier ou compléter. Les seuils se règlent sur les cas de calibrage, séparés des cas d'évaluation (§15).
-- **Erreurs** : `not-configured`, `unauthorized`, `invalid-request`, `unavailable`, `invalid-response`. Aucune ne produit un succès.
+- **Accès** : Jev est le fournisseur intégré **TypeSafe AI** des réglages IA de l'espace, activé avec sa clé. Un agent le choisit avec `modelId` ; l'app n'appelle aucune API de modèle directement et ne stocke aucune clé.
+- **Score** : les niveaux sont décrits du plus bas au plus haut ; Jev renvoie la moyenne des indices pondérée par les probabilités. Conversion vers 0–100 : `score / (niveaux − 1) × 100`. Un score hors de l'échelle ou une distribution incomplète n'est jamais utilisé.
+- **Priorité** : pondérer les dimensions évaluées avec les poids versionnés de la grille. Une dimension inconnue est exclue et signalée, jamais comptée comme nulle ; la couverture et la confiance la plus basse s'affichent à côté.
+- **Seuils** : agir, vérifier ou compléter selon la confiance. Les seuils se règlent sur les cas de calibrage, séparés des cas d'évaluation (§15). Une panne du fournisseur produit un état explicite, jamais un succès.
 
 ## Modèles génératifs
 
-Dans Upshift, le modèle d'un agent se choisit avec `modelId` parmi les fournisseurs configurés dans les réglages IA de l'espace. Cible : Gemini, GPT, DeepSeek, Qwen, Claude. Le MVP exige deux fournisseurs réellement testés sur un même contrat de skill ; `src/models/providers.ts` tient leur statut.
+Dans Upshift, le modèle d'un agent se choisit avec `modelId` parmi les fournisseurs activés dans les réglages IA de l'espace. L'espace propose Anthropic, Google, Mistral, OpenAI, TypeSafe AI et xAI ; DeepSeek et Qwen, visés par le sujet, n'y figurent pas encore. Le MVP exige deux fournisseurs génératifs réellement testés sur un même contrat de skill ; `src/models/providers.ts` tient leur statut.
 
 ## Points à vérifier pendant l'audit
 

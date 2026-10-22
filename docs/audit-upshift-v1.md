@@ -45,7 +45,7 @@ Statuts : **présente et testée** · **présente mais non configurée** · **ab
 | Effet de `canAccessAllTools` sur les outils de l'app | à vérifier | | |
 | Rôle d'agent appliqué : accès hors délégation refusé | à vérifier | | |
 | Droit IA du rôle de l'application (`runAgent()`) | à vérifier | | |
-| Accès à Jev (clé TypeSafe, modèle) | à vérifier | | |
+| Fournisseur TypeSafe AI (Jev) activé dans les réglages IA | présente mais non configurée | Proposé sans clé (« No credentials »), 22 oct. | |
 | Deux fournisseurs génératifs réellement appelables | à vérifier | | |
 | Serveur MCP de l'espace | à vérifier | | |
 
