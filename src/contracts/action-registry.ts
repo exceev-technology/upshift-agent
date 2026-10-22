@@ -18,11 +18,11 @@ export const ACTION_REGISTRY: ActionRegistry = {
       companyName: z.string().min(1),
       domain: z.string().min(1).optional(),
       retrievedAt: z.iso.datetime(),
-      // Set when deduplication (S2) matched an existing company: the update then needs its expected state.
+      // Set when deduplication (S2) matched an existing company: the update then targets it.
       matchedRecordId: recordId.optional(),
     }),
     requiredEvidence: ['source'],
-    mutatesExistingRecord: (params) => params.matchedRecordId !== undefined,
+    targetRecordId: (params) => params.matchedRecordId,
     requiresApproval: false,
   }),
   'crm.prospect.update-qualification': defineAction({
@@ -38,7 +38,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       missingInformation: z.array(z.string()),
     }),
     requiredEvidence: ['scoring'],
-    mutatesExistingRecord: true,
+    targetRecordId: (params) => params.recordId,
     requiresApproval: false,
   }),
   'engagement.message.draft': defineAction({
@@ -48,7 +48,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     description: "Enregistrer un brouillon de message sur le dossier, sans l'envoyer.",
     params: z.object({ recordId, channel: z.literal('test'), body: z.string().min(1) }),
     requiredEvidence: [],
-    mutatesExistingRecord: true,
+    targetRecordId: (params) => params.recordId,
     requiresApproval: false,
   }),
   'engagement.message.send-test': defineAction({
@@ -63,7 +63,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       body: z.string().min(1),
     }),
     requiredEvidence: ['draft'],
-    mutatesExistingRecord: true,
+    targetRecordId: (params) => params.recordId,
     requiresApproval: true,
   }),
   'crm.task.create': defineAction({
@@ -78,7 +78,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       assigneeId: recordId.optional(),
     }),
     requiredEvidence: [],
-    mutatesExistingRecord: true,
+    targetRecordId: (params) => params.recordId,
     requiresApproval: false,
   }),
   'deals.proposal.prepare': defineAction({
@@ -100,7 +100,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       discountPercent: z.number().min(0).max(100),
     }),
     requiredEvidence: ['qualifiedNeed'],
-    mutatesExistingRecord: true,
+    targetRecordId: (params) => params.opportunityId,
     requiresApproval: true,
   }),
   'crm.opportunity.update-stage': defineAction({
@@ -114,7 +114,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     }),
     // Only a terminal outcome needs its proof; ordinary progression does not.
     requiredEvidence: (params) => (params.stage === 'WON' || params.stage === 'LOST' ? ['stageProof'] : []),
-    mutatesExistingRecord: true,
+    targetRecordId: (params) => params.opportunityId,
     requiresApproval: false,
   }),
   // Kept in the registry so a recommendation to run it is refused explicitly (brief §13).
@@ -125,7 +125,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     description: 'Suppression définitive : interdite aux agents.',
     params: z.object({ recordId }),
     requiredEvidence: [],
-    mutatesExistingRecord: true,
+    targetRecordId: (params) => params.recordId,
     requiresApproval: true,
   }),
 };

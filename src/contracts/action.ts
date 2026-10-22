@@ -20,8 +20,9 @@ export type ActionDefinition = {
   params: z.ZodType;
   // Evidence keys the proposal must carry for these (validated) parameters.
   requiredEvidence: (params: unknown) => string[];
-  // Whether these parameters change an existing dossier, which must then name its expected state.
-  mutatesExistingRecord: (params: unknown) => boolean;
+  // The existing record these parameters change, if any. It must belong to the checked dossier, and the
+  // proposal must then name the dossier state it expects.
+  targetRecordId: (params: unknown) => string | undefined;
   requiresApproval: boolean;
 };
 
@@ -37,20 +38,18 @@ export const defineAction = <TSchema extends z.ZodType>(definition: {
   description: string;
   params: TSchema;
   requiredEvidence: Requirement<z.infer<TSchema>, string[]>;
-  mutatesExistingRecord: Requirement<z.infer<TSchema>, boolean>;
+  // Omit for an action that only creates records.
+  targetRecordId?: (params: z.infer<TSchema>) => string | undefined;
   requiresApproval: boolean;
 }): ActionDefinition => {
-  const { requiredEvidence, mutatesExistingRecord } = definition;
+  const { requiredEvidence, targetRecordId } = definition;
 
   // Only called with parameters already validated by `params`.
   return {
     ...definition,
     requiredEvidence: (params) =>
       typeof requiredEvidence === 'function' ? requiredEvidence(params as z.infer<TSchema>) : requiredEvidence,
-    mutatesExistingRecord: (params) =>
-      typeof mutatesExistingRecord === 'function'
-        ? mutatesExistingRecord(params as z.infer<TSchema>)
-        : mutatesExistingRecord,
+    targetRecordId: (params) => targetRecordId?.(params as z.infer<TSchema>),
   };
 };
 
@@ -97,6 +96,7 @@ export type ActionRefusalReason =
   | 'not-delegated'
   | 'schema-version-mismatch'
   | 'invalid-params'
+  | 'target-mismatch'
   | 'missing-evidence'
   | 'unverified-evidence'
   | 'missing-precondition'
@@ -130,6 +130,8 @@ export type ActionCheckContext = {
   registry: ActionRegistry;
   // The agent's delegation: action identifiers it may propose.
   allowedActions: readonly string[];
+  // Records of the dossier whose state and evidence were loaded (company, people, opportunity…).
+  dossierRecordIds: ReadonlySet<string>;
   currentState?: string;
   executedIntentIds: ReadonlySet<string>;
   // References the server resolved in the CRM, per evidence key: they exist, belong to the dossier and have
@@ -211,6 +213,13 @@ export const checkActionProposal = (
     return refuse('invalid-params', describeIssues(parsed.error));
   }
 
+  // State and evidence were checked for one dossier: the action may only change a record of that dossier.
+  const target = action.targetRecordId(parsed.data);
+
+  if (target !== undefined && !context.dossierRecordIds.has(target)) {
+    return refuse('target-mismatch', `${target} n'appartient pas au dossier contrôlé`);
+  }
+
   const { evidence, expectedState } = proposal.preconditions;
   const missingEvidence = action.requiredEvidence(parsed.data).filter((key) => !evidence[key]);
 
@@ -228,7 +237,7 @@ export const checkActionProposal = (
       `Preuves introuvables dans le dossier : ${unverifiedEvidence.map(([key]) => key).join(', ')}`,
     );
   }
-  if (action.mutatesExistingRecord(parsed.data) && expectedState === undefined) {
+  if (target !== undefined && expectedState === undefined) {
     return refuse('missing-precondition', `${action.id} modifie un dossier existant : état attendu requis`);
   }
   if (expectedState !== undefined && expectedState !== context.currentState) {

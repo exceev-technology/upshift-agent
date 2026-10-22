@@ -44,6 +44,7 @@ const context = (overrides: Partial<ActionCheckContext> = {}): ActionCheckContex
   identity,
   registry: ACTION_REGISTRY,
   allowedActions: AGENTS.engagement.allowedActions,
+  dossierRecordIds: new Set([RECORD_ID]),
   currentState: 'QUALIFIED',
   executedIntentIds: new Set(),
   verifiedEvidence: new Map([
@@ -222,6 +223,18 @@ describe('checkActionProposal', () => {
       status: 'refused',
       reason: 'missing-evidence',
     });
+  });
+
+  it('refuses to change a record outside the checked dossier', () => {
+    const otherOpportunity = taskProposal({
+      actionId: 'crm.opportunity.update-stage',
+      params: { opportunityId: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', stage: 'PROPOSAL' },
+      preconditions: { expectedState: 'QUALIFIED', evidence: {} },
+    });
+
+    expect(
+      checkActionProposal(otherOpportunity, context({ allowedActions: AGENTS.deals.allowedActions })),
+    ).toMatchObject({ status: 'refused', reason: 'target-mismatch' });
   });
 
   it('refuses when the dossier changed since the proposal', () => {

@@ -45,7 +45,7 @@ La sortie d'un modèle n'est qu'une **proposition**. Le serveur la contrôle ava
 
 Une proposition porte l'identifiant d'action et sa version de schéma, les paramètres, les préconditions (état attendu, références des preuves) et un identifiant d'intention. Elle ne porte ni son identité ni sa propre approbation.
 
-Le contexte du contrôle vient uniquement de l'état du serveur : identité de l'exécution (organisation, délégant, agent, skill, modèle et leurs versions), délégation de l'agent, état courant du dossier, intentions déjà exécutées, références de preuves résolues dans le CRM et approbations enregistrées par les personnes habilitées. Le verdict reprend cette identité pour le journal.
+Le contexte du contrôle vient uniquement de l'état du serveur : identité de l'exécution (organisation, délégant, agent, skill, modèle et leurs versions), délégation de l'agent, enregistrements et état courant du dossier, intentions déjà exécutées, références de preuves résolues dans le CRM et approbations enregistrées par les personnes habilitées. Le verdict reprend cette identité pour le journal.
 
 `checkActionProposal` applique les contrôles dans cet ordre :
 
@@ -58,6 +58,7 @@ Le contexte du contrôle vient uniquement de l'état du serveur : identité de l
 | Intention pas encore exécutée | `already-done` : un événement rejoué ne produit pas un second effet |
 | Version du schéma | refus `schema-version-mismatch` |
 | Paramètres valides (zod, à l'exécution) | refus `invalid-params` |
+| Enregistrement visé appartenant au dossier contrôlé | refus `target-mismatch` |
 | Preuves requises pour ces paramètres présentes (la pièce d'issue n'est exigée que pour « gagnée » ou « perdue ») | refus `missing-evidence` |
 | Chaque référence de preuve résolue par le serveur dans le dossier, pour ce type de preuve | refus `unverified-evidence` |
 | État attendu fourni pour toute modification d'un dossier existant, y compris un prospect rapproché | refus `missing-precondition` |
