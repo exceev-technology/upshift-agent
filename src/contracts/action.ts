@@ -25,7 +25,7 @@ export type ActionDefinition = {
   evidenceClaims: (params: unknown) => Record<string, unknown>;
   // Dossier states in which the action must not run, e.g. after a contact refusal.
   blockedStates: readonly string[];
-  // The only current states these parameters may start from, e.g. the stages a deal may move from.
+  // The only states the target record may currently be in, e.g. the stages a deal may move from.
   allowedFromStates: (params: unknown) => readonly string[] | undefined;
   // The existing record these parameters change, if any. It must belong to the checked dossier, and the
   // proposal must then name the dossier state it expects.
@@ -170,6 +170,8 @@ export type ActionCheckContext = {
   allowedActions: readonly string[];
   // Records of the dossier whose state and evidence were loaded (company, people, opportunity…).
   dossierRecordIds: ReadonlySet<string>;
+  // Current state of each of those records as loaded by the server, e.g. an opportunity's stage.
+  recordStates: ReadonlyMap<string, string>;
   currentState?: string;
   // Intents already executed, with the content hash each one ran with.
   executedIntents: ReadonlyMap<string, string>;
@@ -335,12 +337,14 @@ export const checkActionProposal = (
     return refuse('state-not-allowed', `${action.id} est interdite dans l'état ${context.currentState}`);
   }
 
+  // A transition is checked against the target record's own state, never the dossier's.
   const allowedFrom = action.allowedFromStates(parsed.data);
+  const targetState = target === undefined ? undefined : context.recordStates.get(target);
 
-  if (allowedFrom !== undefined && (context.currentState === undefined || !allowedFrom.includes(context.currentState))) {
+  if (allowedFrom !== undefined && (targetState === undefined || !allowedFrom.includes(targetState))) {
     return refuse(
       'transition-not-allowed',
-      `Passage interdit depuis l'état ${context.currentState ?? 'inconnu'} (autorisé depuis : ${allowedFrom.join(', ') || 'aucun'})`,
+      `Passage interdit depuis l'état ${targetState ?? 'inconnu'} (autorisé depuis : ${allowedFrom.join(', ') || 'aucun'})`,
     );
   }
 

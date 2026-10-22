@@ -57,6 +57,7 @@ const context = (overrides: Partial<ActionCheckContext> = {}): ActionCheckContex
     ['source', new Map([[SOURCE_REF, { kind: 'corpus' }]])],
   ]),
   allowedAssigneeIds: new Set([OWNER_ID]),
+  recordStates: new Map(),
   approvals: new Map(),
   ...overrides,
 });
@@ -257,13 +258,13 @@ describe('checkActionProposal', () => {
     const toWon = taskProposal({
       actionId: 'crm.opportunity.update-stage',
       params: { opportunityId: RECORD_ID, stage: 'WON' },
-      preconditions: { expectedState: 'PROPOSAL', evidence: { stageProof: 'proof-1' } },
+      preconditions: { expectedState: 'QUALIFIED', evidence: { stageProof: 'proof-1' } },
     });
     const withProof = (attested: { opportunityId: string; outcome: string }) =>
       context({
         allowedActions: AGENTS.deals.allowedActions,
         dossierRecordIds: new Set([RECORD_ID, OTHER_OPPORTUNITY_ID]),
-        currentState: 'PROPOSAL',
+        recordStates: new Map([[RECORD_ID, 'PROPOSAL']]),
         verifiedEvidence: new Map([['stageProof', new Map([['proof-1', attested]])]]),
       });
     const refusal = { status: 'refused', reason: 'evidence-mismatch' };
@@ -281,14 +282,29 @@ describe('checkActionProposal', () => {
         taskProposal({
           actionId: 'crm.opportunity.update-stage',
           params: { opportunityId: RECORD_ID, stage: 'PROPOSAL' },
-          preconditions: { expectedState: from, evidence: {} },
+          preconditions: { expectedState: 'QUALIFIED', evidence: {} },
         }),
-        context({ allowedActions: AGENTS.deals.allowedActions, currentState: from }),
+        context({ allowedActions: AGENTS.deals.allowedActions, recordStates: new Map([[RECORD_ID, from]]) }),
       );
+    const refusal = { status: 'refused', reason: 'transition-not-allowed' };
 
     expect(toProposal('MEETING').status).toBe('ready');
-    expect(toProposal('WON')).toMatchObject({ status: 'refused', reason: 'transition-not-allowed' });
-    expect(toProposal('NEW')).toMatchObject({ status: 'refused', reason: 'transition-not-allowed' });
+    expect(toProposal('WON')).toMatchObject(refusal);
+    expect(toProposal('NEW')).toMatchObject(refusal);
+    // A deferred deal resumes at the meeting stage, so the deferral cannot skip it.
+    expect(toProposal('DEFERRED')).toMatchObject(refusal);
+  });
+
+  it('checks a transition against the target record, refusing an unknown stage', () => {
+    const toProposal = taskProposal({
+      actionId: 'crm.opportunity.update-stage',
+      params: { opportunityId: RECORD_ID, stage: 'PROPOSAL' },
+    });
+
+    // The dossier state looks fine, but the opportunity's own stage is unknown.
+    expect(
+      checkActionProposal(toProposal, context({ allowedActions: AGENTS.deals.allowedActions, currentState: 'QUALIFIED' })),
+    ).toMatchObject({ status: 'refused', reason: 'transition-not-allowed' });
   });
 
   it('reuses an equivalent open task instead of creating it again', () => {
@@ -336,9 +352,12 @@ describe('checkActionProposal', () => {
       taskProposal({
         actionId: 'crm.opportunity.update-stage',
         params: { opportunityId: RECORD_ID, stage },
-        preconditions: { expectedState: 'MEETING', evidence: {} },
+        preconditions: { expectedState: 'QUALIFIED', evidence: {} },
       });
-    const deals = context({ allowedActions: AGENTS.deals.allowedActions, currentState: 'MEETING' });
+    const deals = context({
+      allowedActions: AGENTS.deals.allowedActions,
+      recordStates: new Map([[RECORD_ID, 'MEETING']]),
+    });
 
     expect(checkActionProposal(toStage('PROPOSAL'), deals).status).toBe('ready');
     expect(checkActionProposal(toStage('WON'), deals)).toMatchObject({

@@ -68,7 +68,7 @@ Le contexte du contrôle vient uniquement de l'état du serveur : identité de l
 | État attendu fourni pour toute modification d'un dossier existant, y compris un prospect rapproché | refus `missing-precondition` |
 | État du dossier inchangé | refus `stale-state` : conflit visible |
 | Action permise dans cet état (aucune relance après un refus de contact) | refus `state-not-allowed` |
-| Passage d'étape autorisé depuis l'étape courante (« gagnée » et « perdue » sont définitives, aucune étape sautée) | refus `transition-not-allowed` |
+| Passage d'étape autorisé depuis l'étape courante de l'enregistrement visé (« gagnée » et « perdue » sont définitives, aucune étape sautée, reprise après report au rendez-vous) | refus `transition-not-allowed` |
 | Approbation enregistrée pour ce contenu exact et cette intention | `awaiting-approval` ; toute modification exige une nouvelle approbation |
 
 Catégories d'action (§13) : `consultation`, `bounded-change` (modification bornée), `external-contact`, `commercial-commitment`, `forbidden`. Le registre initial (`src/contracts/action-registry.ts`) couvre le cycle commercial ; ses paramètres sont un premier jet à affiner avec le processus métier.

@@ -10,10 +10,10 @@ export const CONTACT_REFUSED = 'CONTACT_REFUSED';
 const OPPORTUNITY_STAGES = ['MEETING', 'PROPOSAL', 'WON', 'LOST', 'DEFERRED'] as const;
 
 // The stages each stage may be reached from: a first draft, to align with the workspace pipeline.
-// Won and lost are final, and no stage can be skipped.
+// Won and lost are final, no stage can be skipped, and a deferred deal resumes at the meeting stage.
 export const STAGE_TRANSITIONS: Record<(typeof OPPORTUNITY_STAGES)[number], readonly string[]> = {
   MEETING: ['NEW', 'DEFERRED'],
-  PROPOSAL: ['MEETING', 'DEFERRED'],
+  PROPOSAL: ['MEETING'],
   WON: ['PROPOSAL'],
   LOST: ['NEW', 'MEETING', 'PROPOSAL', 'DEFERRED'],
   DEFERRED: ['NEW', 'MEETING', 'PROPOSAL'],
