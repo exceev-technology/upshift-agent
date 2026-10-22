@@ -13,6 +13,8 @@ const RECORD_ID = '0f8a4c7e-3b2d-4e6f-9a1b-2c3d4e5f6a7b';
 const DRAFT_NOTE_ID = '6d1e2f3a-4b5c-4d7e-8f9a-0b1c2d3e4f5a';
 const SOURCE_REF = 'corpus-essai#12';
 const OWNER_ID = '5e6f7a8b-9c0d-4e1f-8a2b-3c4d5e6f7a8b';
+const OTHER_OPPORTUNITY_ID = '7c8d9e0f-1a2b-4c3d-9e4f-5a6b7c8d9e0f';
+const EXISTING_TASK_ID = '3a4b5c6d-7e8f-4a9b-8c0d-1e2f3a4b5c6d';
 
 const identity: ActionIdentity = {
   workspaceId: 'workspace-test',
@@ -51,7 +53,7 @@ const context = (overrides: Partial<ActionCheckContext> = {}): ActionCheckContex
   allowedRecipients: new Set(['prospect@example.test']),
   // Each verified reference with the value it attests.
   verifiedEvidence: new Map<string, ReadonlyMap<string, unknown>>([
-    ['draft', new Map([[DRAFT_NOTE_ID, 'Bonjour']])],
+    ['draft', new Map([[DRAFT_NOTE_ID, { recordId: RECORD_ID, body: 'Bonjour' }]])],
     ['source', new Map([[SOURCE_REF, { kind: 'corpus' }]])],
   ]),
   allowedAssigneeIds: new Set([OWNER_ID]),
@@ -251,22 +253,48 @@ describe('checkActionProposal', () => {
     });
   });
 
-  it('accepts a won stage only with a proof that records a win', () => {
+  it('accepts a won stage only with a proof of a win for this opportunity', () => {
     const toWon = taskProposal({
       actionId: 'crm.opportunity.update-stage',
       params: { opportunityId: RECORD_ID, stage: 'WON' },
-      preconditions: { expectedState: 'QUALIFIED', evidence: { stageProof: 'proof-1' } },
+      preconditions: { expectedState: 'PROPOSAL', evidence: { stageProof: 'proof-1' } },
     });
-    const withProof = (outcome: string) =>
+    const withProof = (attested: { opportunityId: string; outcome: string }) =>
       context({
         allowedActions: AGENTS.deals.allowedActions,
-        verifiedEvidence: new Map([['stageProof', new Map([['proof-1', outcome]])]]),
+        dossierRecordIds: new Set([RECORD_ID, OTHER_OPPORTUNITY_ID]),
+        currentState: 'PROPOSAL',
+        verifiedEvidence: new Map([['stageProof', new Map([['proof-1', attested]])]]),
       });
+    const refusal = { status: 'refused', reason: 'evidence-mismatch' };
 
-    expect(checkActionProposal(toWon, withProof('WON')).status).toBe('ready');
-    expect(checkActionProposal(toWon, withProof('LOST'))).toMatchObject({
+    expect(checkActionProposal(toWon, withProof({ opportunityId: RECORD_ID, outcome: 'WON' })).status).toBe('ready');
+    expect(checkActionProposal(toWon, withProof({ opportunityId: RECORD_ID, outcome: 'LOST' }))).toMatchObject(refusal);
+    expect(
+      checkActionProposal(toWon, withProof({ opportunityId: OTHER_OPPORTUNITY_ID, outcome: 'WON' })),
+    ).toMatchObject(refusal);
+  });
+
+  it('never reopens a closed opportunity nor skips a stage', () => {
+    const toProposal = (from: string) =>
+      checkActionProposal(
+        taskProposal({
+          actionId: 'crm.opportunity.update-stage',
+          params: { opportunityId: RECORD_ID, stage: 'PROPOSAL' },
+          preconditions: { expectedState: from, evidence: {} },
+        }),
+        context({ allowedActions: AGENTS.deals.allowedActions, currentState: from }),
+      );
+
+    expect(toProposal('MEETING').status).toBe('ready');
+    expect(toProposal('WON')).toMatchObject({ status: 'refused', reason: 'transition-not-allowed' });
+    expect(toProposal('NEW')).toMatchObject({ status: 'refused', reason: 'transition-not-allowed' });
+  });
+
+  it('reuses an equivalent open task instead of creating it again', () => {
+    expect(checkActionProposal(taskProposal(), context({ deduplicationMatch: EXISTING_TASK_ID }))).toMatchObject({
       status: 'refused',
-      reason: 'evidence-mismatch',
+      reason: 'duplicate-mismatch',
     });
   });
 
@@ -308,9 +336,9 @@ describe('checkActionProposal', () => {
       taskProposal({
         actionId: 'crm.opportunity.update-stage',
         params: { opportunityId: RECORD_ID, stage },
-        preconditions: { expectedState: 'QUALIFIED', evidence: {} },
+        preconditions: { expectedState: 'MEETING', evidence: {} },
       });
-    const deals = context({ allowedActions: AGENTS.deals.allowedActions });
+    const deals = context({ allowedActions: AGENTS.deals.allowedActions, currentState: 'MEETING' });
 
     expect(checkActionProposal(toStage('PROPOSAL'), deals).status).toBe('ready');
     expect(checkActionProposal(toStage('WON'), deals)).toMatchObject({
@@ -361,7 +389,7 @@ describe('checkActionProposal', () => {
     });
 
     const editedDraft = new Map<string, ReadonlyMap<string, unknown>>([
-      ['draft', new Map([[DRAFT_NOTE_ID, 'Autre texte']])],
+      ['draft', new Map([[DRAFT_NOTE_ID, { recordId: RECORD_ID, body: 'Autre texte' }]])],
     ]);
 
     expect(

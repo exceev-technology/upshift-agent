@@ -7,6 +7,18 @@ const recordId = z.uuid();
 // Dossier state recorded when a prospect refuses contact: every follow-up stops (brief §13).
 export const CONTACT_REFUSED = 'CONTACT_REFUSED';
 
+const OPPORTUNITY_STAGES = ['MEETING', 'PROPOSAL', 'WON', 'LOST', 'DEFERRED'] as const;
+
+// The stages each stage may be reached from: a first draft, to align with the workspace pipeline.
+// Won and lost are final, and no stage can be skipped.
+export const STAGE_TRANSITIONS: Record<(typeof OPPORTUNITY_STAGES)[number], readonly string[]> = {
+  MEETING: ['NEW', 'DEFERRED'],
+  PROPOSAL: ['MEETING', 'DEFERRED'],
+  WON: ['PROPOSAL'],
+  LOST: ['NEW', 'MEETING', 'PROPOSAL', 'DEFERRED'],
+  DEFERRED: ['NEW', 'MEETING', 'PROPOSAL'],
+};
+
 // Starter registry for the commercial cycle. Parameters and evidence are a first draft from the
 // brief (§10, §12); refine them with the business process before implementing each tool.
 export const ACTION_REGISTRY: ActionRegistry = {
@@ -28,6 +40,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     targetRecordId: (params) => params.matchedRecordId,
     // The match must equal the server's deduplication result, so a known company is never created twice.
     deduplicated: true,
+    matchedRecordId: (params) => params.matchedRecordId,
     requiresApproval: false,
   }),
   'crm.prospect.update-qualification': defineAction({
@@ -45,7 +58,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: ['scoring'],
     // The recorded score is the one the verified scoring artifact holds, never a model-supplied value.
     evidenceClaims: (params) => ({
-      scoring: { priorityScore: params.priorityScore, gridVersion: params.gridVersion },
+      scoring: { recordId: params.recordId, priorityScore: params.priorityScore, gridVersion: params.gridVersion },
     }),
     targetRecordId: (params) => params.recordId,
     requiresApproval: false,
@@ -73,8 +86,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
       body: z.string().min(1),
     }),
     requiredEvidence: ['draft'],
-    // The text sent is exactly the text of the verified draft.
-    evidenceClaims: (params) => ({ draft: params.body }),
+    // The text sent is exactly the text of the verified draft of this dossier.
+    evidenceClaims: (params) => ({ draft: { recordId: params.recordId, body: params.body } }),
     blockedStates: [CONTACT_REFUSED],
     targetRecordId: (params) => params.recordId,
     recipient: (params) => params.recipient,
@@ -94,6 +107,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: [],
     blockedStates: [CONTACT_REFUSED],
     targetRecordId: (params) => params.recordId,
+    // An equivalent open task found by the server is reused, never created again (S7).
+    deduplicated: true,
     assignee: (params) => params.assigneeId,
     requiresApproval: false,
   }),
@@ -127,12 +142,15 @@ export const ACTION_REGISTRY: ActionRegistry = {
     description: "Faire avancer l'opportunité ; une issue gagnée ou perdue exige la pièce prévue.",
     params: z.object({
       opportunityId: recordId,
-      stage: z.enum(['MEETING', 'PROPOSAL', 'WON', 'LOST', 'DEFERRED']),
+      stage: z.enum(OPPORTUNITY_STAGES),
     }),
-    // Only a terminal outcome needs its proof, and the proof must record that same outcome.
+    // Only a terminal outcome needs its proof, and the proof must record that outcome for this opportunity.
     requiredEvidence: (params) => (params.stage === 'WON' || params.stage === 'LOST' ? ['stageProof'] : []),
     evidenceClaims: (params) =>
-      params.stage === 'WON' || params.stage === 'LOST' ? { stageProof: params.stage } : {},
+      params.stage === 'WON' || params.stage === 'LOST'
+        ? { stageProof: { opportunityId: params.opportunityId, outcome: params.stage } }
+        : {},
+    allowedFromStates: (params) => STAGE_TRANSITIONS[params.stage],
     targetRecordId: (params) => params.opportunityId,
     requiresApproval: false,
   }),

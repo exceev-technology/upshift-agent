@@ -20,15 +20,20 @@ export type ActionDefinition = {
   params: z.ZodType;
   // Evidence keys the proposal must carry for these (validated) parameters.
   requiredEvidence: (params: unknown) => string[];
-  // What each evidence key must attest for these parameters, e.g. the outcome a stage proof records.
+  // What each evidence key must attest for these parameters, including the record it concerns, so a proof
+  // for one record never serves another (e.g. the outcome a stage proof records for one opportunity).
   evidenceClaims: (params: unknown) => Record<string, unknown>;
   // Dossier states in which the action must not run, e.g. after a contact refusal.
   blockedStates: readonly string[];
+  // The only current states these parameters may start from, e.g. the stages a deal may move from.
+  allowedFromStates: (params: unknown) => readonly string[] | undefined;
   // The existing record these parameters change, if any. It must belong to the checked dossier, and the
   // proposal must then name the dossier state it expects.
   targetRecordId: (params: unknown) => string | undefined;
-  // The target must then equal the match found by the server's deduplication (none for a creation).
+  // The existing record the proposal claims to match must equal the server's deduplication result:
+  // an equivalent company or open task found by the server can never be created again.
   deduplicated: boolean;
+  matchedRecordId: (params: unknown) => string | undefined;
   // External recipient, which must be one of the trusted test recipients.
   recipient: (params: unknown) => string | undefined;
   // Workspace member the action assigns work to, which must be an authorised assignee.
@@ -50,14 +55,18 @@ export const defineAction = <TSchema extends z.ZodType>(definition: {
   requiredEvidence: Requirement<z.infer<TSchema>, string[]>;
   evidenceClaims?: (params: z.infer<TSchema>) => Record<string, unknown>;
   blockedStates?: readonly string[];
+  allowedFromStates?: (params: z.infer<TSchema>) => readonly string[] | undefined;
   // Omit for an action that only creates records.
   targetRecordId?: (params: z.infer<TSchema>) => string | undefined;
   deduplicated?: boolean;
+  // Omit when the action never matches an existing record: any server match then refuses it.
+  matchedRecordId?: (params: z.infer<TSchema>) => string | undefined;
   recipient?: (params: z.infer<TSchema>) => string | undefined;
   assignee?: (params: z.infer<TSchema>) => string | undefined;
   requiresApproval: boolean;
 }): ActionDefinition => {
-  const { requiredEvidence, evidenceClaims, targetRecordId, recipient, assignee } = definition;
+  const { requiredEvidence, evidenceClaims, allowedFromStates, targetRecordId, matchedRecordId, recipient, assignee } =
+    definition;
 
   // Only called with parameters already validated by `params`.
   return {
@@ -66,8 +75,10 @@ export const defineAction = <TSchema extends z.ZodType>(definition: {
       typeof requiredEvidence === 'function' ? requiredEvidence(params as z.infer<TSchema>) : requiredEvidence,
     evidenceClaims: (params) => evidenceClaims?.(params as z.infer<TSchema>) ?? {},
     blockedStates: definition.blockedStates ?? [],
+    allowedFromStates: (params) => allowedFromStates?.(params as z.infer<TSchema>),
     targetRecordId: (params) => targetRecordId?.(params as z.infer<TSchema>),
     deduplicated: definition.deduplicated ?? false,
+    matchedRecordId: (params) => matchedRecordId?.(params as z.infer<TSchema>),
     recipient: (params) => recipient?.(params as z.infer<TSchema>),
     assignee: (params) => assignee?.(params as z.infer<TSchema>),
   };
@@ -123,6 +134,7 @@ export type ActionRefusalReason =
   | 'assignee-not-allowed'
   | 'evidence-mismatch'
   | 'state-not-allowed'
+  | 'transition-not-allowed'
   | 'missing-evidence'
   | 'unverified-evidence'
   | 'missing-precondition'
@@ -161,7 +173,8 @@ export type ActionCheckContext = {
   currentState?: string;
   // Intents already executed, with the content hash each one ran with.
   executedIntents: ReadonlyMap<string, string>;
-  // The existing record the server's deduplication matched for this proposal, if any.
+  // The existing record the server's deduplication matched for this proposal (an equivalent company,
+  // an equivalent open task…), if any.
   deduplicationMatch?: string;
   // Test recipients allowed on the test channel, lower-cased.
   allowedRecipients: ReadonlySet<string>;
@@ -254,11 +267,12 @@ export const checkActionProposal = (
   }
 
   const target = action.targetRecordId(parsed.data);
+  const claimedMatch = action.matchedRecordId(parsed.data);
 
-  if (action.deduplicated && target !== context.deduplicationMatch) {
+  if (action.deduplicated && claimedMatch !== context.deduplicationMatch) {
     return refuse(
       'duplicate-mismatch',
-      `Le serveur a rapproché ${context.deduplicationMatch ?? 'aucune fiche'}, la proposition ${target ?? 'aucune fiche'}`,
+      `Le serveur a rapproché ${context.deduplicationMatch ?? 'aucune fiche'}, la proposition ${claimedMatch ?? 'aucune fiche'}`,
     );
   }
   // State and evidence were checked for one dossier: the action may only change a record of that dossier.
@@ -319,6 +333,15 @@ export const checkActionProposal = (
   }
   if (context.currentState !== undefined && action.blockedStates.includes(context.currentState)) {
     return refuse('state-not-allowed', `${action.id} est interdite dans l'état ${context.currentState}`);
+  }
+
+  const allowedFrom = action.allowedFromStates(parsed.data);
+
+  if (allowedFrom !== undefined && (context.currentState === undefined || !allowedFrom.includes(context.currentState))) {
+    return refuse(
+      'transition-not-allowed',
+      `Passage interdit depuis l'état ${context.currentState ?? 'inconnu'} (autorisé depuis : ${allowedFrom.join(', ') || 'aucun'})`,
+    );
   }
 
   if (!action.requiresApproval) {
