@@ -51,15 +51,16 @@ Le contexte du contrôle vient uniquement de l'état du serveur : délégation d
 
 | Contrôle | Résultat en cas d'échec |
 | --- | --- |
+| Proposition bien formée (validée avant toute lecture) | refus `invalid-proposal` |
 | Action présente dans le registre | refus `unknown-action` |
 | Action non interdite | refus `forbidden-action`, même si un modèle ou un texte du CRM la recommande |
 | Action déléguée à l'agent | refus `not-delegated` |
 | Intention pas encore exécutée | `already-done` : un événement rejoué ne produit pas un second effet |
 | Version du schéma | refus `schema-version-mismatch` |
 | Paramètres valides (zod, à l'exécution) | refus `invalid-params` |
-| Preuves requises présentes | refus `missing-evidence` |
+| Preuves requises pour ces paramètres présentes (la pièce d'issue n'est exigée que pour « gagnée » ou « perdue ») | refus `missing-evidence` |
 | Chaque référence de preuve résolue par le serveur dans le dossier, pour ce type de preuve | refus `unverified-evidence` |
-| État attendu fourni pour toute modification d'un dossier existant | refus `missing-precondition` |
+| État attendu fourni pour toute modification d'un dossier existant, y compris un prospect rapproché | refus `missing-precondition` |
 | État du dossier inchangé | refus `stale-state` : conflit visible |
 | Approbation enregistrée pour ce contenu exact et cette intention | `awaiting-approval` ; toute modification exige une nouvelle approbation |
 

@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-import type { ActionRegistry } from 'src/contracts/action';
+import { defineAction, type ActionRegistry } from 'src/contracts/action';
 
 const recordId = z.uuid();
 
 // Starter registry for the commercial cycle. Parameters and evidence are a first draft from the
 // brief (§10, §12); refine them with the business process before implementing each tool.
 export const ACTION_REGISTRY: ActionRegistry = {
-  'crm.prospect.upsert': {
+  'crm.prospect.upsert': defineAction({
     id: 'crm.prospect.upsert',
     schemaVersion: '0.1.0',
     category: 'bounded-change',
@@ -16,13 +16,14 @@ export const ACTION_REGISTRY: ActionRegistry = {
       companyName: z.string().min(1),
       domain: z.string().min(1).optional(),
       source: z.object({ reference: z.string().min(1), retrievedAt: z.iso.datetime() }),
+      // Set when deduplication (S2) matched an existing company: the update then needs its expected state.
+      matchedRecordId: recordId.optional(),
     }),
     requiredEvidence: ['source'],
-    // Creates or matches a record; deduplication rules (S2) decide which.
-    mutatesExistingRecord: false,
+    mutatesExistingRecord: (params) => params.matchedRecordId !== undefined,
     requiresApproval: false,
-  },
-  'crm.prospect.update-qualification': {
+  }),
+  'crm.prospect.update-qualification': defineAction({
     id: 'crm.prospect.update-qualification',
     schemaVersion: '0.1.0',
     category: 'bounded-change',
@@ -37,8 +38,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: ['scoring'],
     mutatesExistingRecord: true,
     requiresApproval: false,
-  },
-  'engagement.message.draft': {
+  }),
+  'engagement.message.draft': defineAction({
     id: 'engagement.message.draft',
     schemaVersion: '0.1.0',
     category: 'bounded-change',
@@ -47,8 +48,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: [],
     mutatesExistingRecord: true,
     requiresApproval: false,
-  },
-  'engagement.message.send-test': {
+  }),
+  'engagement.message.send-test': defineAction({
     id: 'engagement.message.send-test',
     schemaVersion: '0.1.0',
     category: 'external-contact',
@@ -62,8 +63,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: ['draft'],
     mutatesExistingRecord: true,
     requiresApproval: true,
-  },
-  'crm.task.create': {
+  }),
+  'crm.task.create': defineAction({
     id: 'crm.task.create',
     schemaVersion: '0.1.0',
     category: 'bounded-change',
@@ -77,8 +78,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: [],
     mutatesExistingRecord: true,
     requiresApproval: false,
-  },
-  'deals.proposal.prepare': {
+  }),
+  'deals.proposal.prepare': defineAction({
     id: 'deals.proposal.prepare',
     schemaVersion: '0.1.0',
     category: 'commercial-commitment',
@@ -99,8 +100,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: ['qualifiedNeed'],
     mutatesExistingRecord: true,
     requiresApproval: true,
-  },
-  'crm.opportunity.update-stage': {
+  }),
+  'crm.opportunity.update-stage': defineAction({
     id: 'crm.opportunity.update-stage',
     schemaVersion: '0.1.0',
     category: 'bounded-change',
@@ -109,12 +110,13 @@ export const ACTION_REGISTRY: ActionRegistry = {
       opportunityId: recordId,
       stage: z.enum(['MEETING', 'PROPOSAL', 'WON', 'LOST', 'DEFERRED']),
     }),
-    requiredEvidence: ['stageProof'],
+    // Only a terminal outcome needs its proof; ordinary progression does not.
+    requiredEvidence: (params) => (params.stage === 'WON' || params.stage === 'LOST' ? ['stageProof'] : []),
     mutatesExistingRecord: true,
     requiresApproval: false,
-  },
+  }),
   // Kept in the registry so a recommendation to run it is refused explicitly (brief §13).
-  'crm.record.destroy': {
+  'crm.record.destroy': defineAction({
     id: 'crm.record.destroy',
     schemaVersion: '0.1.0',
     category: 'forbidden',
@@ -123,5 +125,5 @@ export const ACTION_REGISTRY: ActionRegistry = {
     requiredEvidence: [],
     mutatesExistingRecord: true,
     requiresApproval: true,
-  },
+  }),
 };

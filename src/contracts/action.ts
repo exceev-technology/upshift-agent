@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { z } from 'zod';
+import { z } from 'zod';
 
 // Typed action contract (brief §12). A model output is only a proposal: the server checks it
 // against the registry, the agent's delegation, the evidence and the dossier state before any write.
@@ -18,14 +18,41 @@ export type ActionDefinition = {
   category: ActionCategory;
   description: string;
   params: z.ZodType;
-  // Evidence references the proposal must carry, e.g. the source of a new prospect.
-  requiredEvidence: string[];
-  // A change to an existing dossier must name the state it was proposed against.
-  mutatesExistingRecord: boolean;
+  // Evidence keys the proposal must carry for these (validated) parameters.
+  requiredEvidence: (params: unknown) => string[];
+  // Whether these parameters change an existing dossier, which must then name its expected state.
+  mutatesExistingRecord: (params: unknown) => boolean;
   requiresApproval: boolean;
 };
 
 export type ActionRegistry = Record<string, ActionDefinition>;
+
+type Requirement<TParams, TValue> = TValue | ((params: TParams) => TValue);
+
+// Declares an action whose requirements may depend on its parameters, typed from its schema.
+export const defineAction = <TSchema extends z.ZodType>(definition: {
+  id: string;
+  schemaVersion: string;
+  category: ActionCategory;
+  description: string;
+  params: TSchema;
+  requiredEvidence: Requirement<z.infer<TSchema>, string[]>;
+  mutatesExistingRecord: Requirement<z.infer<TSchema>, boolean>;
+  requiresApproval: boolean;
+}): ActionDefinition => {
+  const { requiredEvidence, mutatesExistingRecord } = definition;
+
+  // Only called with parameters already validated by `params`.
+  return {
+    ...definition,
+    requiredEvidence: (params) =>
+      typeof requiredEvidence === 'function' ? requiredEvidence(params as z.infer<TSchema>) : requiredEvidence,
+    mutatesExistingRecord: (params) =>
+      typeof mutatesExistingRecord === 'function'
+        ? mutatesExistingRecord(params as z.infer<TSchema>)
+        : mutatesExistingRecord,
+  };
+};
 
 // Fixed by the system, never by the model.
 export type ActionIdentity = {
@@ -50,9 +77,22 @@ export type ActionProposal = {
   intentId: string;
 };
 
+// The proposal may come from model output: its shape is validated before anything reads it.
+const proposalEnvelopeSchema = z.object({
+  actionId: z.string().min(1),
+  schemaVersion: z.string().min(1),
+  params: z.unknown(),
+  preconditions: z.object({
+    expectedState: z.string().min(1).optional(),
+    evidence: z.record(z.string(), z.string().min(1)),
+  }),
+  intentId: z.string().min(1),
+});
+
 export type ActionApproval = { approvedBy: string; approvedAt: string };
 
 export type ActionRefusalReason =
+  | 'invalid-proposal'
   | 'unknown-action'
   | 'forbidden-action'
   | 'not-delegated'
@@ -122,10 +162,20 @@ const refuse = (reason: ActionRefusalReason, detail: string): ActionVerdict => (
   detail,
 });
 
+const describeIssues = (error: z.ZodError) =>
+  error.issues.map((issue) => `${issue.path.join('.') || '(racine)'} : ${issue.message}`).join(' ; ');
+
 export const checkActionProposal = (
-  proposal: ActionProposal,
+  candidate: unknown,
   context: ActionCheckContext,
 ): ActionVerdict => {
+  const envelope = proposalEnvelopeSchema.safeParse(candidate);
+
+  if (!envelope.success) {
+    return refuse('invalid-proposal', describeIssues(envelope.error));
+  }
+
+  const proposal = envelope.data;
   const action = context.registry[proposal.actionId];
 
   if (action === undefined) {
@@ -150,14 +200,11 @@ export const checkActionProposal = (
   const parsed = action.params.safeParse(proposal.params);
 
   if (!parsed.success) {
-    return refuse(
-      'invalid-params',
-      parsed.error.issues.map((issue) => `${issue.path.join('.') || '(racine)'} : ${issue.message}`).join(' ; '),
-    );
+    return refuse('invalid-params', describeIssues(parsed.error));
   }
 
   const { evidence, expectedState } = proposal.preconditions;
-  const missingEvidence = action.requiredEvidence.filter((key) => !evidence[key]);
+  const missingEvidence = action.requiredEvidence(parsed.data).filter((key) => !evidence[key]);
 
   if (missingEvidence.length > 0) {
     return refuse('missing-evidence', `Preuves manquantes : ${missingEvidence.join(', ')}`);
@@ -173,7 +220,7 @@ export const checkActionProposal = (
       `Preuves introuvables dans le dossier : ${unverifiedEvidence.map(([key]) => key).join(', ')}`,
     );
   }
-  if (action.mutatesExistingRecord && expectedState === undefined) {
+  if (action.mutatesExistingRecord(parsed.data) && expectedState === undefined) {
     return refuse('missing-precondition', `${action.id} modifie un dossier existant : état attendu requis`);
   }
   if (expectedState !== undefined && expectedState !== context.currentState) {

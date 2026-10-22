@@ -62,6 +62,20 @@ describe('checkActionProposal', () => {
     expect(checkActionProposal(taskProposal(), context()).status).toBe('ready');
   });
 
+  it('refuses a malformed proposal instead of throwing', () => {
+    const withoutPreconditions: Record<string, unknown> = { ...taskProposal() };
+    delete withoutPreconditions.preconditions;
+
+    expect(checkActionProposal(withoutPreconditions, context())).toMatchObject({
+      status: 'refused',
+      reason: 'invalid-proposal',
+    });
+    expect(checkActionProposal('crm.task.create', context())).toMatchObject({
+      status: 'refused',
+      reason: 'invalid-proposal',
+    });
+  });
+
   it('refuses an unknown action', () => {
     const verdict = checkActionProposal(taskProposal({ actionId: 'crm.invent' }), context());
 
@@ -150,6 +164,45 @@ describe('checkActionProposal', () => {
     expect(
       checkActionProposal(upsert, context({ allowedActions: AGENTS.acquisition.allowedActions })).status,
     ).toBe('ready');
+  });
+
+  it('requires the expected state when an upsert matches an existing company', () => {
+    const match = (preconditions: ActionProposal['preconditions']) =>
+      taskProposal({
+        actionId: 'crm.prospect.upsert',
+        params: {
+          companyName: 'Exemple SARL',
+          source: { reference: SOURCE_REF, retrievedAt: '2026-10-22T08:00:00Z' },
+          matchedRecordId: RECORD_ID,
+        },
+        preconditions,
+      });
+    const acquisition = context({ allowedActions: AGENTS.acquisition.allowedActions });
+
+    expect(checkActionProposal(match({ evidence: { source: SOURCE_REF } }), acquisition)).toMatchObject({
+      status: 'refused',
+      reason: 'missing-precondition',
+    });
+    expect(
+      checkActionProposal(match({ expectedState: 'QUALIFIED', evidence: { source: SOURCE_REF } }), acquisition)
+        .status,
+    ).toBe('ready');
+  });
+
+  it('requires the stage proof only for a won or lost outcome', () => {
+    const toStage = (stage: string) =>
+      taskProposal({
+        actionId: 'crm.opportunity.update-stage',
+        params: { opportunityId: RECORD_ID, stage },
+        preconditions: { expectedState: 'QUALIFIED', evidence: {} },
+      });
+    const deals = context({ allowedActions: AGENTS.deals.allowedActions });
+
+    expect(checkActionProposal(toStage('PROPOSAL'), deals).status).toBe('ready');
+    expect(checkActionProposal(toStage('WON'), deals)).toMatchObject({
+      status: 'refused',
+      reason: 'missing-evidence',
+    });
   });
 
   it('refuses when the dossier changed since the proposal', () => {
