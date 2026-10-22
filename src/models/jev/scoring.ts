@@ -31,9 +31,14 @@ export const scoreToPercent = (answer: Pick<JevScoreAnswer, 'score'>, levelCount
     throw new RangeError('A score needs at least two levels');
   }
 
-  const percent = (answer.score / (levelCount - 1)) * 100;
+  const topLevel = levelCount - 1;
 
-  return Math.round(Math.min(100, Math.max(0, percent)) * 10) / 10;
+  // Out-of-range scores are refused rather than clamped: they signal a malformed answer.
+  if (answer.score < 0 || answer.score > topLevel + 1e-9) {
+    throw new RangeError(`Score ${answer.score} is outside 0–${topLevel}`);
+  }
+
+  return Math.round((Math.min(answer.score, topLevel) / topLevel) * 1000) / 10;
 };
 
 export type DimensionResult =

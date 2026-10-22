@@ -1,15 +1,18 @@
 import { spawn } from 'child_process';
 import { delimiter, join } from 'path';
 
-type TwentyCliError = {
+// Binary name installed by the SDK's CLI package; override it with UPSHIFT_CLI.
+const DEFAULT_CLI_BINARY = 'twenty';
+
+type UpshiftCliError = {
   code: string;
   message: string;
   hint?: string;
 };
 
-export type TwentyCliResult =
+export type UpshiftCliResult =
   | { ok: true; data: unknown }
-  | { ok: false; error: TwentyCliError };
+  | { ok: false; error: UpshiftCliError };
 
 function withoutProjectBinaries(pathValue: string) {
   return pathValue
@@ -22,8 +25,8 @@ function withoutProjectBinaries(pathValue: string) {
     .join(delimiter);
 }
 
-export function runTwenty(args: string[]): Promise<TwentyCliResult> {
-  const executable = process.env.TWENTY_CLI ?? 'twenty';
+export function runUpshiftCli(args: string[]): Promise<UpshiftCliResult> {
+  const executable = process.env.UPSHIFT_CLI ?? DEFAULT_CLI_BINARY;
 
   return new Promise((resolve, reject) => {
     const child = spawn(executable, [...args, '--json'], {
@@ -44,7 +47,7 @@ export function runTwenty(args: string[]): Promise<TwentyCliResult> {
       reject(
         error.code === 'ENOENT'
           ? new Error(
-              `${executable} was not found. Install the Upshift CLI globally (npm install -g twenty), or set TWENTY_CLI to its path.`,
+              `${executable} was not found. Install the Upshift CLI globally (see the CI workflow), or set UPSHIFT_CLI to its path.`,
             )
           : error,
       );
@@ -57,7 +60,7 @@ export function runTwenty(args: string[]): Promise<TwentyCliResult> {
         reject(
           new Error(
             `${executable} ${args.join(' ')} exited with code ${exitCode} without a JSON result. ` +
-              'Check that it is the Upshift CLI (twenty --version), or set TWENTY_CLI to its path.',
+              'Check that it is the Upshift CLI (--version), or set UPSHIFT_CLI to its path.',
           ),
         );
       }

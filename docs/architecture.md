@@ -43,7 +43,9 @@ La sortie d'un modèle n'est qu'une **proposition**. Le serveur la contrôle ava
 
 ## Contrat d'action
 
-Une proposition porte l'identité fixée par le système (organisation, délégant, agent, skill, versions, modèle), l'identifiant d'action et sa version de schéma, les paramètres, les préconditions (état attendu, preuves), un identifiant d'intention et, si besoin, une approbation.
+Une proposition porte l'identité fixée par le système (organisation, délégant, agent, skill, versions, modèle), l'identifiant d'action et sa version de schéma, les paramètres, les préconditions (état attendu, références des preuves) et un identifiant d'intention. Elle ne porte jamais sa propre approbation.
+
+Le contexte du contrôle vient uniquement de l'état du serveur : délégation de l'agent, état courant du dossier, intentions déjà exécutées, références de preuves résolues dans le CRM et approbations enregistrées par les personnes habilitées.
 
 `checkActionProposal` applique les contrôles dans cet ordre :
 
@@ -56,8 +58,10 @@ Une proposition porte l'identité fixée par le système (organisation, déléga
 | Version du schéma | refus `schema-version-mismatch` |
 | Paramètres valides (zod, à l'exécution) | refus `invalid-params` |
 | Preuves requises présentes | refus `missing-evidence` |
+| Chaque référence de preuve résolue par le serveur dans le dossier | refus `unverified-evidence` |
+| État attendu fourni pour toute modification d'un dossier existant | refus `missing-precondition` |
 | État du dossier inchangé | refus `stale-state` : conflit visible |
-| Approbation liée au contenu exact | `awaiting-approval`, ou refus `approval-mismatch` si le contenu a changé |
+| Approbation enregistrée pour ce contenu exact et cette intention | `awaiting-approval` ; toute modification exige une nouvelle approbation |
 
 Catégories d'action (§13) : `consultation`, `bounded-change` (modification bornée), `external-contact`, `commercial-commitment`, `forbidden`. Le registre initial (`src/contracts/action-registry.ts`) couvre le cycle commercial ; ses paramètres sont un premier jet à affiner avec le processus métier.
 
@@ -69,8 +73,8 @@ Catégories d'action (§13) : `consultation`, `bounded-change` (modification bor
 | Évaluer | Score | Adéquation au profil, pertinence du besoin, signal d'intention, temporalité |
 | Vérifier | Noul | La réponse contient-elle une demande de rendez-vous ? |
 
-- **Appel** : `POST https://api.typesafe.ai/v1/systemone`, clé dans la variable `TYPESAFE_API_KEY`, modèle dans `JEV_MODEL` (`jev-latest` par défaut). La réponse est validée à l'exécution.
-- **Score** : les niveaux sont décrits du plus bas au plus haut ; Jev renvoie la moyenne des indices pondérée par les probabilités. Conversion : `score / (niveaux − 1) × 100`.
+- **Appel** : `POST https://api.typesafe.ai/v1/systemone`, clé dans la variable `TYPESAFE_API_KEY`, modèle dans `JEV_MODEL` (`jev-latest` par défaut). La réponse est validée à l'exécution, y compris contre les critères de chaque question : un choix inconnu ou un score hors échelle est rejeté.
+- **Score** : les niveaux sont décrits du plus bas au plus haut ; Jev renvoie la moyenne des indices pondérée par les probabilités. Conversion : `score / (niveaux − 1) × 100` ; un score hors de l'échelle est refusé, jamais ramené à 100.
 - **Priorité** : `combinePriority` pondère les dimensions évaluées avec les poids versionnés de la grille. Une dimension inconnue est exclue et signalée, jamais comptée comme nulle ; la couverture et la confiance la plus basse sont affichées à côté.
 - **Seuils** : `decideOnConfidence` renvoie agir, vérifier ou compléter. Les seuils se règlent sur les cas de calibrage, séparés des cas d'évaluation (§15).
 - **Erreurs** : `not-configured`, `unauthorized`, `invalid-request`, `unavailable`, `invalid-response`. Aucune ne produit un succès.

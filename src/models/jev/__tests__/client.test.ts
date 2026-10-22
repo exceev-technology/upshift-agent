@@ -88,6 +88,28 @@ describe('createHttpJevClient', () => {
 
     await expect(client.ask({ state, questions })).rejects.toMatchObject({ kind: 'invalid-response' });
   });
+
+  it("rejects a choice outside the question's options", async () => {
+    const unknown = { ...okBody, answers: { intent: { ...okBody.answers.intent, choice: 'enthusiastic' } } };
+    const client = createHttpJevClient({ apiKey: 'test-key', fetchImpl: respondWith(200, unknown) });
+
+    await expect(client.ask({ state, questions })).rejects.toMatchObject({ kind: 'invalid-response' });
+  });
+
+  it('rejects a score above the top level instead of treating it as maximal', async () => {
+    const scoreQuestions: JevQuestions = {
+      fit: { type: 'score', instructions: 'Adéquation au profil client idéal', criteria: ['Faible', 'Moyen', 'Fort'] },
+    };
+    const outOfRange: JevResponse = {
+      model: 'jev-latest',
+      answers: { fit: { type: 'score', score: 2.5, confidence: 0.9, probabilities: { '0': 0, '1': 0.5, '2': 0.5 } } },
+    };
+    const client = createHttpJevClient({ apiKey: 'test-key', fetchImpl: respondWith(200, outOfRange) });
+
+    await expect(client.ask({ state, questions: scoreQuestions })).rejects.toMatchObject({
+      kind: 'invalid-response',
+    });
+  });
 });
 
 describe('createJevClientFromEnv', () => {

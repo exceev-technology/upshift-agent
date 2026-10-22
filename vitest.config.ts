@@ -1,14 +1,19 @@
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
-const TWENTY_API_URL = process.env.TWENTY_API_URL ?? 'http://localhost:2020';
-const TWENTY_API_KEY =
-  process.env.TWENTY_API_KEY ??
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDIwMjAyMC0xYzI1LTRkMDItYmYyNS02YWVjY2Y3ZWE0MTkiLCJ0eXBlIjoiQVBJX0tFWSIsIndvcmtzcGFjZUlkIjoiMjAyMDIwMjAtMWMyNS00ZDAyLWJmMjUtNmFlY2NmN2VhNDE5IiwiaWF0IjoxNzM1Njg5NjAwLCJleHAiOjQ4OTE0NDk2MDAsImp0aSI6IjIwMjAyMDIwLWY0MDEtNGQ4YS1hNzMxLTY0ZDAwN2MyN2JhZCJ9.bfQjfyN0NEtTCLE_xPyNcwonDzlSXFoP8kdCQTdnuDc';
+// No credential in the repository: integration tests read the test workspace's API key from
+// UPSHIFT_API_KEY. The SDK client and CLI expect their own variable names, mapped here once.
+const UPSHIFT_API_URL = process.env.UPSHIFT_API_URL ?? 'http://localhost:2020';
+const UPSHIFT_API_KEY = process.env.UPSHIFT_API_KEY;
 
-// Make env vars available to globalSetup (test.env only applies to workers)
-process.env.TWENTY_API_URL = TWENTY_API_URL;
-process.env.TWENTY_API_KEY = TWENTY_API_KEY;
+const env: Record<string, string> = {
+  UPSHIFT_API_URL,
+  TWENTY_API_URL: UPSHIFT_API_URL,
+  ...(UPSHIFT_API_KEY ? { UPSHIFT_API_KEY, TWENTY_API_KEY: UPSHIFT_API_KEY } : {}),
+};
+
+// Make the variables available to globalSetup and the CLI it spawns (test.env only applies to workers).
+Object.assign(process.env, env);
 
 export default defineConfig({
   plugins: [
@@ -23,9 +28,6 @@ export default defineConfig({
     fileParallelism: false,
     include: ['src/**/*.integration-test.ts'],
     globalSetup: ['src/__tests__/global-setup.ts'],
-    env: {
-      TWENTY_API_URL,
-      TWENTY_API_KEY,
-    },
+    env,
   },
 });

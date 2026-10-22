@@ -1,14 +1,13 @@
-import { runTwenty } from './run-twenty';
+import { runUpshiftCli } from './run-upshift-cli';
 
 function validateEnv(): { apiUrl: string; apiKey: string } {
-  const apiUrl = process.env.TWENTY_API_URL;
-  const apiKey = process.env.TWENTY_API_KEY;
+  const apiUrl = process.env.UPSHIFT_API_URL;
+  const apiKey = process.env.UPSHIFT_API_KEY;
 
   if (!apiUrl || !apiKey) {
     throw new Error(
-      'TWENTY_API_URL and TWENTY_API_KEY must be set.\n' +
-        'Start a local server: yarn twenty docker:start\n' +
-        'Or set them in vitest env config.',
+      'UPSHIFT_API_KEY must be set to an API key of the test workspace; never commit it.\n' +
+        'Start a local server with: yarn upshift docker:start',
     );
   }
 
@@ -36,9 +35,9 @@ export async function setup() {
   const { apiUrl } = validateEnv();
 
   await checkServer(apiUrl);
-  await runTwenty(['app', 'uninstall', '--yes']);
+  await runUpshiftCli(['app', 'uninstall', '--yes']);
 
-  const result = await runTwenty(['app', 'apply', '--create']);
+  const result = await runUpshiftCli(['app', 'apply', '--create']);
 
   if (!result.ok) {
     throw new Error(
@@ -48,7 +47,7 @@ export async function setup() {
 }
 
 export async function teardown() {
-  const result = await runTwenty(['app', 'uninstall', '--yes']);
+  const result = await runUpshiftCli(['app', 'uninstall', '--yes']);
 
   if (!result.ok) {
     console.warn(`App uninstall failed: ${result.error.message}`);

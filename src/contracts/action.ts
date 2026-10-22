@@ -20,6 +20,8 @@ export type ActionDefinition = {
   params: z.ZodType;
   // Evidence references the proposal must carry, e.g. the source of a new prospect.
   requiredEvidence: string[];
+  // A change to an existing dossier must name the state it was proposed against.
+  mutatesExistingRecord: boolean;
   requiresApproval: boolean;
 };
 
@@ -41,12 +43,14 @@ export type ActionProposal = {
   params: unknown;
   preconditions: {
     expectedState?: string;
+    // Evidence key → reference, e.g. a record id. The server resolves every reference before the check.
     evidence: Record<string, string>;
   };
   // Same intent, same effect: a replayed event must not create a second record, task or message.
   intentId: string;
-  approval?: { approvedBy: string; contentHash: string };
 };
+
+export type ActionApproval = { approvedBy: string; approvedAt: string };
 
 export type ActionRefusalReason =
   | 'unknown-action'
@@ -55,11 +59,12 @@ export type ActionRefusalReason =
   | 'schema-version-mismatch'
   | 'invalid-params'
   | 'missing-evidence'
-  | 'stale-state'
-  | 'approval-mismatch';
+  | 'unverified-evidence'
+  | 'missing-precondition'
+  | 'stale-state';
 
 export type ActionVerdict =
-  | { status: 'ready'; action: ActionDefinition; params: unknown }
+  | { status: 'ready'; action: ActionDefinition; params: unknown; approval?: ActionApproval }
   | { status: 'already-done'; intentId: string }
   | { status: 'awaiting-approval'; contentHash: string }
   | { status: 'refused'; reason: ActionRefusalReason; detail: string };
@@ -72,12 +77,17 @@ export type ActionResult = {
   detail?: string;
 };
 
+// Everything here comes from trusted server state, never from the proposal or the model.
 export type ActionCheckContext = {
   registry: ActionRegistry;
   // The agent's delegation: action identifiers it may propose.
   allowedActions: readonly string[];
   currentState?: string;
   executedIntentIds: ReadonlySet<string>;
+  // References the server resolved in the CRM: they exist, belong to the dossier and have the expected kind.
+  verifiedEvidenceRefs: ReadonlySet<string>;
+  // Approvals recorded by authorised members, keyed by the content hash they approved.
+  approvals: ReadonlyMap<string, ActionApproval>;
 };
 
 const stableStringify = (value: unknown): string => {
@@ -95,12 +105,14 @@ const stableStringify = (value: unknown): string => {
   return JSON.stringify(value);
 };
 
-// An approval is bound to the exact content: any change to the action or its parameters voids it.
+// An approval is bound to the exact content and intent: any change needs a new approval.
 export const hashActionContent = (
-  proposal: Pick<ActionProposal, 'actionId' | 'schemaVersion' | 'params'>,
+  proposal: Pick<ActionProposal, 'actionId' | 'schemaVersion' | 'params' | 'intentId'>,
 ) =>
   createHash('sha256')
-    .update(stableStringify([proposal.actionId, proposal.schemaVersion, proposal.params]))
+    .update(
+      stableStringify([proposal.actionId, proposal.schemaVersion, proposal.params, proposal.intentId]),
+    )
     .digest('hex');
 
 const refuse = (reason: ActionRefusalReason, detail: string): ActionVerdict => ({
@@ -143,16 +155,26 @@ export const checkActionProposal = (
     );
   }
 
-  const missingEvidence = action.requiredEvidence.filter(
-    (key) => !proposal.preconditions.evidence[key],
-  );
+  const { evidence, expectedState } = proposal.preconditions;
+  const missingEvidence = action.requiredEvidence.filter((key) => !evidence[key]);
 
   if (missingEvidence.length > 0) {
     return refuse('missing-evidence', `Preuves manquantes : ${missingEvidence.join(', ')}`);
   }
 
-  const { expectedState } = proposal.preconditions;
+  const unverifiedEvidence = Object.entries(evidence).filter(
+    ([, reference]) => !context.verifiedEvidenceRefs.has(reference),
+  );
 
+  if (unverifiedEvidence.length > 0) {
+    return refuse(
+      'unverified-evidence',
+      `Preuves introuvables dans le dossier : ${unverifiedEvidence.map(([key]) => key).join(', ')}`,
+    );
+  }
+  if (action.mutatesExistingRecord && expectedState === undefined) {
+    return refuse('missing-precondition', `${action.id} modifie un dossier existant : état attendu requis`);
+  }
   if (expectedState !== undefined && expectedState !== context.currentState) {
     return refuse(
       'stale-state',
@@ -160,16 +182,16 @@ export const checkActionProposal = (
     );
   }
 
-  if (action.requiresApproval) {
-    const contentHash = hashActionContent(proposal);
-
-    if (proposal.approval === undefined) {
-      return { status: 'awaiting-approval', contentHash };
-    }
-    if (proposal.approval.contentHash !== contentHash) {
-      return refuse('approval-mismatch', 'Le contenu a changé depuis l’approbation');
-    }
+  if (!action.requiresApproval) {
+    return { status: 'ready', action, params: parsed.data };
   }
 
-  return { status: 'ready', action, params: parsed.data };
+  const contentHash = hashActionContent(proposal);
+  const approval = context.approvals.get(contentHash);
+
+  if (approval === undefined) {
+    return { status: 'awaiting-approval', contentHash };
+  }
+
+  return { status: 'ready', action, params: parsed.data, approval };
 };

@@ -34,6 +34,10 @@ describe('scoreToPercent', () => {
   it('refuses a scale with fewer than two levels', () => {
     expect(() => scoreToPercent({ score: 0 }, 1)).toThrow(RangeError);
   });
+
+  it('refuses a score outside the scale instead of clamping it', () => {
+    expect(() => scoreToPercent({ score: 2.5 }, 3)).toThrow(RangeError);
+  });
 });
 
 describe('buildScoreQuestions', () => {

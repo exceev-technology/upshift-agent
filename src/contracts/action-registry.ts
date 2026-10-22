@@ -18,6 +18,8 @@ export const ACTION_REGISTRY: ActionRegistry = {
       source: z.object({ reference: z.string().min(1), retrievedAt: z.iso.datetime() }),
     }),
     requiredEvidence: ['source'],
+    // Creates or matches a record; deduplication rules (S2) decide which.
+    mutatesExistingRecord: false,
     requiresApproval: false,
   },
   'crm.prospect.update-qualification': {
@@ -33,6 +35,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       missingInformation: z.array(z.string()),
     }),
     requiredEvidence: ['scoring'],
+    mutatesExistingRecord: true,
     requiresApproval: false,
   },
   'engagement.message.draft': {
@@ -42,6 +45,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     description: "Enregistrer un brouillon de message sur le dossier, sans l'envoyer.",
     params: z.object({ recordId, channel: z.literal('test'), body: z.string().min(1) }),
     requiredEvidence: [],
+    mutatesExistingRecord: true,
     requiresApproval: false,
   },
   'engagement.message.send-test': {
@@ -56,6 +60,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       body: z.string().min(1),
     }),
     requiredEvidence: ['draft'],
+    mutatesExistingRecord: true,
     requiresApproval: true,
   },
   'crm.task.create': {
@@ -70,6 +75,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       assigneeId: recordId.optional(),
     }),
     requiredEvidence: [],
+    mutatesExistingRecord: true,
     requiresApproval: false,
   },
   'deals.proposal.prepare': {
@@ -91,6 +97,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       discountPercent: z.number().min(0).max(100),
     }),
     requiredEvidence: ['qualifiedNeed'],
+    mutatesExistingRecord: true,
     requiresApproval: true,
   },
   'crm.opportunity.update-stage': {
@@ -103,6 +110,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
       stage: z.enum(['MEETING', 'PROPOSAL', 'WON', 'LOST', 'DEFERRED']),
     }),
     requiredEvidence: ['stageProof'],
+    mutatesExistingRecord: true,
     requiresApproval: false,
   },
   // Kept in the registry so a recommendation to run it is refused explicitly (brief §13).
@@ -113,6 +121,7 @@ export const ACTION_REGISTRY: ActionRegistry = {
     description: 'Suppression définitive : interdite aux agents.',
     params: z.object({ recordId }),
     requiredEvidence: [],
+    mutatesExistingRecord: true,
     requiresApproval: true,
   },
 };

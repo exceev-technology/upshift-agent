@@ -48,3 +48,4 @@ export type JevChoiceAnswer = z.infer<typeof choiceAnswerSchema>;
 export type JevScoreAnswer = z.infer<typeof scoreAnswerSchema>;
 export type JevNoulAnswer = z.infer<typeof noulAnswerSchema>;
 export type JevResponse = z.infer<typeof jevResponseSchema>;
+export type JevAnswer = JevResponse['answers'][string];

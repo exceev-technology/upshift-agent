@@ -1,5 +1,7 @@
 import {
   jevResponseSchema,
+  type JevAnswer,
+  type JevQuestion,
   type JevQuestions,
   type JevResponse,
 } from 'src/models/jev/types';
@@ -40,10 +42,36 @@ type HttpJevClientOptions = {
   fetchImpl?: typeof fetch;
 };
 
+const SCORE_TOLERANCE = 1e-9;
+
+// A value outside the question's criteria is malformed, not extreme: it must never reach the scoring.
+const matchesCriteria = (question: JevQuestion, answer: JevAnswer) => {
+  if (question.type === 'choice' && answer.type === 'choice') {
+    const options = Object.keys(question.criteria);
+
+    return (
+      options.includes(answer.choice) &&
+      Object.keys(answer.probabilities).every((option) => options.includes(option))
+    );
+  }
+  if (question.type === 'score' && answer.type === 'score') {
+    const levels = question.criteria.map((_, index) => String(index));
+
+    return (
+      answer.score <= levels.length - 1 + SCORE_TOLERANCE &&
+      Object.keys(answer.probabilities).every((level) => levels.includes(level))
+    );
+  }
+
+  return question.type === 'noul' && answer.type === 'noul';
+};
+
 const checkAnswers = (response: JevResponse, questions: JevQuestions) => {
   for (const [id, question] of Object.entries(questions)) {
-    if (response.answers[id]?.type !== question.type) {
-      throw new JevError('invalid-response', `Réponse absente ou d'un autre type pour la question ${id}`);
+    const answer = response.answers[id];
+
+    if (answer === undefined || !matchesCriteria(question, answer)) {
+      throw new JevError('invalid-response', `Réponse absente, d'un autre type ou hors critères pour la question ${id}`);
     }
   }
 
