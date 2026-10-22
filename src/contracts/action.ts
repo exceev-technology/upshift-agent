@@ -54,7 +54,7 @@ export const defineAction = <TSchema extends z.ZodType>(definition: {
   };
 };
 
-// Fixed by the system, never by the model.
+// Supplied by the server in the check context, never by the proposal or the model.
 export type ActionIdentity = {
   workspaceId: string;
   delegatorId: string;
@@ -64,7 +64,6 @@ export type ActionIdentity = {
 };
 
 export type ActionProposal = {
-  identity: ActionIdentity;
   actionId: string;
   schemaVersion: string;
   params: unknown;
@@ -104,7 +103,14 @@ export type ActionRefusalReason =
   | 'stale-state';
 
 export type ActionVerdict =
-  | { status: 'ready'; action: ActionDefinition; params: unknown; approval?: ActionApproval }
+  | {
+      status: 'ready';
+      action: ActionDefinition;
+      params: unknown;
+      // The trusted identity, recorded in the journal with the action.
+      identity: ActionIdentity;
+      approval?: ActionApproval;
+    }
   | { status: 'already-done'; intentId: string }
   | { status: 'awaiting-approval'; contentHash: string }
   | { status: 'refused'; reason: ActionRefusalReason; detail: string };
@@ -119,6 +125,8 @@ export type ActionResult = {
 
 // Everything here comes from trusted server state, never from the proposal or the model.
 export type ActionCheckContext = {
+  // Organisation, delegator, agent, skill and model of the run, with their versions.
+  identity: ActionIdentity;
   registry: ActionRegistry;
   // The agent's delegation: action identifiers it may propose.
   allowedActions: readonly string[];
@@ -231,7 +239,7 @@ export const checkActionProposal = (
   }
 
   if (!action.requiresApproval) {
-    return { status: 'ready', action, params: parsed.data };
+    return { status: 'ready', action, params: parsed.data, identity: context.identity };
   }
 
   const contentHash = hashActionContent(proposal);
@@ -241,5 +249,5 @@ export const checkActionProposal = (
     return { status: 'awaiting-approval', contentHash };
   }
 
-  return { status: 'ready', action, params: parsed.data, approval };
+  return { status: 'ready', action, params: parsed.data, identity: context.identity, approval };
 };

@@ -117,7 +117,10 @@ export const createHttpJevClient = ({
       throw new JevError('unauthorized', `Jev a refusé la clé (${response.status})`);
     }
     if (response.status === 400 || response.status === 422) {
-      throw new JevError('invalid-request', `Requête Jev invalide (${response.status}) : ${await response.text()}`);
+      // The rejection stays typed even when its body cannot be read.
+      const detail = await response.text().catch(() => '(corps illisible)');
+
+      throw new JevError('invalid-request', `Requête Jev invalide (${response.status}) : ${detail}`);
     }
     if (!response.ok) {
       throw new JevError('unavailable', `Jev indisponible (${response.status})`);

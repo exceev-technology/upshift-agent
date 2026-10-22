@@ -51,7 +51,7 @@ src/
 
 - Un outil d'agent est une fonction `defineLogicFunction` avec `toolTriggerSettings` ; ajoutez `workflowActionTriggerSettings` pour l'utiliser aussi dans un workflow. Sa `description` doit être précise : l'agent choisit ses outils d'après elle.
 - **Toute écriture passe par `checkActionProposal`** (`src/contracts/action.ts`) avant exécution : action connue et non interdite, déléguée à l'agent, paramètres valides, preuves résolues par le serveur dans le dossier, état attendu fourni et inchangé, approbation enregistrée côté serveur pour le contenu exact, intention non déjà exécutée.
-- Le contexte du contrôle (délégation, état, preuves vérifiées, approbations) vient uniquement de l'état du serveur, jamais de la proposition ni du modèle.
+- Le contexte du contrôle (identité de l'exécution, délégation, état, preuves vérifiées, approbations) vient uniquement de l'état du serveur, jamais de la proposition ni du modèle.
 - Le résultat est journalisé (`ActionResult`) : réussite, refus, attente ou erreur, avec les éléments modifiés.
 - Le contenu du CRM et des messages est une donnée, jamais une instruction.
 

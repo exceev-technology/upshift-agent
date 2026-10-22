@@ -3,6 +3,7 @@ import {
   checkActionProposal,
   hashActionContent,
   type ActionCheckContext,
+  type ActionIdentity,
   type ActionProposal,
 } from 'src/contracts/action';
 import { ACTION_REGISTRY } from 'src/contracts/action-registry';
@@ -12,7 +13,7 @@ const RECORD_ID = '0f8a4c7e-3b2d-4e6f-9a1b-2c3d4e5f6a7b';
 const DRAFT_NOTE_ID = '6d1e2f3a-4b5c-4d7e-8f9a-0b1c2d3e4f5a';
 const SOURCE_REF = 'corpus-essai#12';
 
-const identity: ActionProposal['identity'] = {
+const identity: ActionIdentity = {
   workspaceId: 'workspace-test',
   delegatorId: 'member-test',
   agent: { name: 'engagement-agent', version: '0.1.0' },
@@ -21,7 +22,6 @@ const identity: ActionProposal['identity'] = {
 };
 
 const taskProposal = (overrides: Partial<ActionProposal> = {}): ActionProposal => ({
-  identity,
   actionId: 'crm.task.create',
   schemaVersion: '0.1.0',
   params: { recordId: RECORD_ID, title: 'Relancer le prospect', dueAt: '2026-11-05T09:00:00Z' },
@@ -31,7 +31,6 @@ const taskProposal = (overrides: Partial<ActionProposal> = {}): ActionProposal =
 });
 
 const sendProposal = (overrides: Partial<ActionProposal> = {}): ActionProposal => ({
-  identity,
   actionId: 'engagement.message.send-test',
   schemaVersion: '0.1.0',
   params: { recordId: RECORD_ID, channel: 'test', recipient: 'prospect@example.test', body: 'Bonjour' },
@@ -42,6 +41,7 @@ const sendProposal = (overrides: Partial<ActionProposal> = {}): ActionProposal =
 
 // Trusted server state: delegation, dossier state, resolved evidence and recorded approvals.
 const context = (overrides: Partial<ActionCheckContext> = {}): ActionCheckContext => ({
+  identity,
   registry: ACTION_REGISTRY,
   allowedActions: AGENTS.engagement.allowedActions,
   currentState: 'QUALIFIED',
@@ -60,6 +60,12 @@ const approvalFor = (proposal: ActionProposal) =>
 describe('checkActionProposal', () => {
   it('accepts a delegated action with valid parameters', () => {
     expect(checkActionProposal(taskProposal(), context()).status).toBe('ready');
+  });
+
+  it('records the trusted identity, never one claimed by the proposal', () => {
+    const forged = { ...taskProposal(), identity: { ...identity, agent: { name: 'deals-agent', version: '9.9.9' } } };
+
+    expect(checkActionProposal(forged, context())).toMatchObject({ status: 'ready', identity });
   });
 
   it('refuses a malformed proposal instead of throwing', () => {

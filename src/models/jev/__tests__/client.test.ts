@@ -58,6 +58,13 @@ describe('createHttpJevClient', () => {
     await expect(client.ask({ state, questions })).rejects.toMatchObject({ kind: 'invalid-request' });
   });
 
+  it('keeps a rejected request typed when its body cannot be read', async () => {
+    const brokenBody = { status: 422, ok: false, text: () => Promise.reject(new TypeError('terminated')) };
+    const client = createHttpJevClient({ apiKey: 'test-key', fetchImpl: vi.fn(async () => brokenBody as unknown as Response) });
+
+    await expect(client.ask({ state, questions })).rejects.toMatchObject({ kind: 'invalid-request' });
+  });
+
   it('reports a server failure as unavailable', async () => {
     const client = createHttpJevClient({ apiKey: 'test-key', fetchImpl: respondWith(503, {}) });
 

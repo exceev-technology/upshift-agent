@@ -43,9 +43,9 @@ La sortie d'un modèle n'est qu'une **proposition**. Le serveur la contrôle ava
 
 ## Contrat d'action
 
-Une proposition porte l'identité fixée par le système (organisation, délégant, agent, skill, versions, modèle), l'identifiant d'action et sa version de schéma, les paramètres, les préconditions (état attendu, références des preuves) et un identifiant d'intention. Elle ne porte jamais sa propre approbation.
+Une proposition porte l'identifiant d'action et sa version de schéma, les paramètres, les préconditions (état attendu, références des preuves) et un identifiant d'intention. Elle ne porte ni son identité ni sa propre approbation.
 
-Le contexte du contrôle vient uniquement de l'état du serveur : délégation de l'agent, état courant du dossier, intentions déjà exécutées, références de preuves résolues dans le CRM et approbations enregistrées par les personnes habilitées.
+Le contexte du contrôle vient uniquement de l'état du serveur : identité de l'exécution (organisation, délégant, agent, skill, modèle et leurs versions), délégation de l'agent, état courant du dossier, intentions déjà exécutées, références de preuves résolues dans le CRM et approbations enregistrées par les personnes habilitées. Le verdict reprend cette identité pour le journal.
 
 `checkActionProposal` applique les contrôles dans cet ordre :
 
