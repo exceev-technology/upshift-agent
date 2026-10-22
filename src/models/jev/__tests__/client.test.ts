@@ -135,4 +135,10 @@ describe('createSimulatedJevClient', () => {
     expect(client.mode).toBe('simulated');
     await expect(client.ask({ state, questions })).resolves.toMatchObject({ model: 'jev-latest' });
   });
+
+  it('reports a malformed simulated answer as invalid-response', async () => {
+    const client = createSimulatedJevClient(() => ({ model: 'jev-latest' }) as unknown as JevResponse);
+
+    await expect(client.ask({ state, questions })).rejects.toMatchObject({ kind: 'invalid-response' });
+  });
 });

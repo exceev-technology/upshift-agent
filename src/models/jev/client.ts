@@ -78,6 +78,17 @@ const checkAnswers = (response: JevResponse, questions: JevQuestions) => {
   return response;
 };
 
+// Shared by the live and simulated clients: any malformed answer becomes an invalid-response JevError.
+const validateResponse = (body: unknown, questions: JevQuestions) => {
+  const parsed = jevResponseSchema.safeParse(body);
+
+  if (!parsed.success) {
+    throw new JevError('invalid-response', `Réponse Jev non conforme : ${parsed.error.message}`);
+  }
+
+  return checkAnswers(parsed.data, questions);
+};
+
 export const createHttpJevClient = ({
   apiKey,
   model = DEFAULT_JEV_MODEL,
@@ -120,13 +131,7 @@ export const createHttpJevClient = ({
       throw new JevError('invalid-response', 'Réponse Jev illisible');
     }
 
-    const parsed = jevResponseSchema.safeParse(body);
-
-    if (!parsed.success) {
-      throw new JevError('invalid-response', `Réponse Jev non conforme : ${parsed.error.message}`);
-    }
-
-    return checkAnswers(parsed.data, questions);
+    return validateResponse(body, questions);
   },
 });
 
@@ -150,6 +155,6 @@ export const createSimulatedJevClient = (
 ): JevClient => ({
   mode: 'simulated',
   async ask(input) {
-    return checkAnswers(jevResponseSchema.parse(respond(input)), input.questions);
+    return validateResponse(respond(input), input.questions);
   },
 });
