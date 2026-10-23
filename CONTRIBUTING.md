@@ -152,7 +152,7 @@ Règles propres au projet, rappelées dans le modèle de PR :
 
 ## Relire une pull request
 
-Chaque PR demande **une approbation** d'un autre membre de l'équipe. Pour les fichiers sensibles (contrats, rôles, identifiants, CI, dépendances), [`CODEOWNERS`](.github/CODEOWNERS) exige que cette approbation vienne de l'encadrement : c'est elle qui débloque la fusion. Demandez aussi la relecture d'un membre de l'équipe sur ces PR : elle est recommandée, mais pas bloquante.
+Chaque PR demande **une approbation**, de l'encadrement ou de n'importe quel autre membre de l'équipe. Sur les fichiers sensibles (contrats, rôles, identifiants, CI, dépendances), [`CODEOWNERS`](.github/CODEOWNERS) demande en plus la revue de l'encadrement, pour qu'il soit prévenu ; une seule approbation suffit toujours à débloquer la fusion. Relisez ces PR avec une attention particulière.
 
 **Délai** : une première réponse dans les 24 h ouvrées. Relire fait partie du travail du sprint, au même titre qu'écrire.
 

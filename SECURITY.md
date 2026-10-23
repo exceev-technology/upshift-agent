@@ -71,7 +71,7 @@ Nous vous tenons informé·e à chaque étape dans le fil du signalement privé.
 | Revue des dépendances | Refuse une PR qui ajoute une dépendance à vulnérabilité haute ou critique |
 | OpenSSF Scorecard | Mesure chaque semaine les bonnes pratiques de la chaîne d'approvisionnement |
 | Règles de la branche `main` | PR obligatoire, revue, vérifications CI, pas de force-push ni de suppression |
-| `CODEOWNERS` | Revue obligatoire de l'encadrement sur les contrats, les rôles, les identifiants, la CI et les dépendances |
+| `CODEOWNERS` | Revue demandée à l'équipe sur chaque PR, et à l'encadrement sur les contrats, les rôles, les identifiants, la CI et les dépendances |
 | Workflows à moindre privilège | Jeton en lecture seule par défaut, actions épinglées par empreinte de commit |
 
 ## Divulgation responsable

@@ -1,6 +1,6 @@
 # Le projet
 
-> 🎯 **Créer dans Upshift V1 plusieurs agents et skills métier réutilisables pour prendre en charge les processus de l'entreprise.** Le CRM sert de cas d'application : rechercher des prospects, les qualifier et faire progresser les affaires jusqu'à leur conclusion. Les travaux validés prépareront les capacités agentiques natives d'Upshift V2.
+> 🎯 **Créer dans Upshift V1 plusieurs agents et skills métier réutilisables pour prendre en charge les processus de l'entreprise.** Le CRM sert de cas d'application : rechercher des prospects, les qualifier et faire progresser les affaires jusqu'à leur conclusion. Les travaux validés prépareront les capacités agentiques natives d'Upshift Agent.
 
 Le cadrage complet est dans le [sujet](https://github.com/exceev-technology/upshift-agent/blob/main/docs/sujet/upshift-ecc-2026-sujet-01-agents-autonomes.md). Cette page en est le résumé de travail.
 
@@ -74,9 +74,9 @@ Une démo qui ne passe que par les cas favorables ne prouve pas la maîtrise de 
 - Combiner les modèles selon la tâche, avec des résultats comparables.
 - Rendre l'autonomie configurable, observable et contrôlable.
 
-## Une base pour Upshift V2
+## Une base pour Upshift Agent
 
-Les skills, agents, contrats d'action, adaptateurs et résultats validés serviront de base à V2. V2 doit proposer ces fonctions nativement aux TPE, aux PME et aux grandes entreprises, sur l'ensemble du parcours : prospection et CRM, devis et commandes, achats et stocks, projets et installations, SAV et maintenance, tableaux de bord et reporting.
+Les skills, agents, contrats d'action, adaptateurs et résultats validés serviront de base à Upshift Agent. Upshift Agent doit proposer ces fonctions nativement aux TPE, aux PME et aux grandes entreprises, sur l'ensemble du parcours : prospection et CRM, devis et commandes, achats et stocks, projets et installations, SAV et maintenance, tableaux de bord et reporting.
 
 ## Règles de travail
 

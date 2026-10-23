@@ -13,7 +13,7 @@
 | Référent et mainteneur | Hamza Lemrani (Exceev) | [@hamza-lem](https://github.com/hamza-lem) | Encadrement technique, revue des zones sensibles, accès et budget |
 | Accompagnement | Hajar (Exceev), Nouhan Kourouma (ECC) | — | Support et suivi pédagogique |
 
-L'équipe GitHub [`@exceev-technology/ecc-team-upshift-v2`](https://github.com/orgs/exceev-technology/teams/ecc-team-upshift-v2) est demandée en revue sur chaque pull request, sauf celles qui ne touchent que des zones sensibles (contrats, rôles, identifiants, CI, dépendances) : l'approbation de l'encadrement y est obligatoire, et la relecture d'un membre se demande à la main.
+L'équipe GitHub [`@exceev-technology/ecc-team-upshift-agent`](https://github.com/orgs/exceev-technology/teams/ecc-team-upshift-agent) est demandée en revue sur chaque pull request ; l'encadrement l'est aussi sur les zones sensibles (contrats, rôles, identifiants, CI, dépendances). Une seule approbation suffit, de l'encadrement ou de n'importe quel membre.
 
 ## Rotation du responsable de la semaine
 

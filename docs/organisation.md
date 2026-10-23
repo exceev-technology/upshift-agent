@@ -38,7 +38,7 @@ Modèle de daily :
 | Sprint 3 · 5 → 11 nov. | Scénario 1 : acquisition et qualification | Recherche sourcée, déduplication, appel Jev, score vérifiable |
 | Sprint 4 · 12 → 18 nov. | Scénario 2 : engagement et autonomie simple | Message de test, réponse traitée, déclencheur, actions sans doublon |
 | Sprint 5 · 19 → 25 nov. | Scénario 3 : parcours d'affaire et coordination | 4 agents, skills partagés, proposition, conclusion documentée |
-| Sprint 6 · 26 nov. → 2 déc. | Comparer et fiabiliser | 2 fournisseurs testés, évaluation, erreurs, composants candidats pour V2 |
+| Sprint 6 · 26 nov. → 2 déc. | Comparer et fiabiliser | 2 fournisseurs testés, évaluation, erreurs, composants candidats pour Upshift Agent |
 | Sprint 7 · 3 → 9 déc. | Stabiliser, documenter, soutenir | Version figée avant le 8, soutenance le 8, dossier de transfert |
 
 Jours fériés : 6 nov. (Marche Verte) et 18 nov. (Fête de l'Indépendance). En cas de retard, on réduit d'abord les canaux, sources et modèles supplémentaires ; on préserve le parcours principal, les skills réutilisables et les contrôles.

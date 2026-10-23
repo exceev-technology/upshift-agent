@@ -30,7 +30,7 @@
 
 ## À propos
 
-**Upshift Agents** compose plusieurs agents et un catalogue de skills partagés pour prendre en charge les processus de l'entreprise, à l'intérieur d'Upshift. Le CRM sert de terrain d'expérimentation : rechercher des prospects, les qualifier et faire progresser les affaires jusqu'à leur conclusion. Les travaux validés serviront de base aux fonctions agentiques natives d'**Upshift V2**.
+**Upshift Agents** compose plusieurs agents et un catalogue de skills partagés pour prendre en charge les processus de l'entreprise, à l'intérieur d'Upshift. Le CRM sert de terrain d'expérimentation : rechercher des prospects, les qualifier et faire progresser les affaires jusqu'à leur conclusion. Les travaux validés serviront de base aux fonctions agentiques natives d'**Upshift Agent**.
 
 Projet Innovation ECC 2026 · Sujet 01 · [Exceev Technology](https://github.com/exceev-technology) × École Centrale Casablanca. **Soutenance du MVP le 8 décembre 2026.**
 
