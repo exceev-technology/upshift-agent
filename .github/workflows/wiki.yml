@@ -1,0 +1,46 @@
+name: Wiki
+
+# The wiki source lives in docs/wiki/ and is reviewed in pull requests like the code.
+# Each merge to main publishes it; edits made directly in the wiki are overwritten by the next run.
+# Prerequisite, once per repository: GitHub only creates the wiki's git repository after a first page
+# is saved in the web UI (Wiki tab, "Create the first page"). There is no API for it.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - docs/wiki/**
+      - .github/workflows/wiki.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check that the wiki exists
+        env:
+          WIKI_GIT: ${{ github.server_url }}/${{ github.repository }}.wiki.git
+          WIKI_PAGE: ${{ github.server_url }}/${{ github.repository }}/wiki
+        run: |
+          if ! git ls-remote "$WIKI_GIT" > /dev/null 2>&1; then
+            echo "::error title=Wiki not initialised::Create a first page at $WIKI_PAGE, then re-run this workflow."
+            exit 1
+          fi
+
+      - name: Publish to the wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@1bbb4280446f9630e8e21a18012cbacf3b0f992e # v5.0.6
+        with:
+          path: docs/wiki/

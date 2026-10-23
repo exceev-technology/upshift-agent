@@ -1,0 +1,55 @@
+title: "Sprint N · "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Réservé au responsable de la semaine et à l'encadrement : le planning en début de sprint (jeudi), le récap après la Sprint Review (mercredi).
+        Partagez ensuite le lien dans le canal Slack du projet.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type d'annonce
+      options:
+        - Planning de sprint
+        - Récap de sprint (review)
+        - Rétrospective
+        - Information
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objectif du sprint
+      description: Une phrase, vérifiable en review.
+    validations:
+      required: true
+
+  - type: textarea
+    id: items
+    attributes:
+      label: Tâches et responsables
+      description: 3 à 5 issues du jalon du sprint, chacune avec une personne responsable.
+      value: |
+        - [ ] #… · @…
+        - [ ] #… · @…
+        - [ ] #… · @…
+
+  - type: textarea
+    id: results
+    attributes:
+      label: Démo et résultats
+      description: "Pour un récap : ce qui a été démontré, avec son statut (prévu, simulé, testé, disponible)."
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Blocages et risques
+      placeholder: "Aucun / …"
+
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Décisions et ajustements
+      description: Priorités revues avec le Product Owner, éléments reportés au sprint suivant.

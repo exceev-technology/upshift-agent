@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Poser une question
+    url: https://github.com/exceev-technology/upshift-agent/discussions/categories/q-a
+    about: Une question sur le projet, le SDK ou Upshift ? Les discussions sont faites pour ça.
+  - name: 💡 Proposer une idée
+    url: https://github.com/exceev-technology/upshift-agent/discussions/categories/ideas
+    about: Une idée encore à discuter avant d'en faire une story.
+  - name: 🔒 Signaler une vulnérabilité
+    url: https://github.com/exceev-technology/upshift-agent/security/advisories/new
+    about: En privé, jamais dans une issue publique.
+  - name: 📚 Documentation Upshift
+    url: https://docs.upshiftcloud.com/en/getting-started/introduction
+    about: Guide utilisateur et documentation développeur d'Upshift.

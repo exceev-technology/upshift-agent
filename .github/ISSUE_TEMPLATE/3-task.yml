@@ -1,0 +1,57 @@
+name: 🧩 Tâche
+description: Un travail technique, une configuration, de la documentation ou de l'apprentissage.
+title: "[Tâche] "
+type: Task
+labels: ["type: tâche", "statut: à trier"]
+projects: ["exceev-technology/2"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objectif
+      description: Pourquoi cette tâche, et ce qu'elle débloque.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Nature
+      options:
+        - Technique (code, tests, refactoring)
+        - Configuration de l'espace Upshift
+        - Audit ou recherche
+        - Documentation ou wiki
+        - Apprentissage
+        - CI, sécurité ou dépendances
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Ce qu'il faut faire
+      description: Découpez en étapes de quelques heures. Plus de deux jours ? Découpez en plusieurs tâches.
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Terminé quand…
+      description: Le résultat vérifiable. La Definition of Done du projet s'applique en plus.
+      value: |
+        - [ ] Le résultat attendu est démontrable ou documenté
+        - [ ] Le statut est indiqué : prévu, simulé, testé ou disponible
+        - [ ] Aucun secret dans le code, l'issue ou Slack
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Liens
+      description: Issue parente, section du sujet, page de documentation, discussion.

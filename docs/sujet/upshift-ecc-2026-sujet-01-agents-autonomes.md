@@ -1,4 +1,4 @@
-# Agents et skills autonomes pour Upshift V2
+# Agents et skills autonomes pour Upshift Agent
 
 Des agents au service des processus de l’entreprise. Cas d’application : le CRM.
 
@@ -14,7 +14,7 @@ Créer des agents et skills réutilisables dans Upshift V1 en prenant **le CRM c
 
 ## L’ambition produit
 
-Préparer les fonctions agentiques natives d’Upshift V2 pour les différents processus de l’entreprise : une **super-intelligence opérationnelle** qui relie données, décisions et actions. Jev de TypeSafe et plusieurs familles de modèles d’IA pourront intervenir dans ce système.
+Préparer les fonctions agentiques natives d’Upshift Agent pour les différents processus de l’entreprise : une **super-intelligence opérationnelle** qui relie données, décisions et actions. Jev de TypeSafe et plusieurs familles de modèles d’IA pourront intervenir dans ce système.
 
 ## Les repères
 
@@ -26,14 +26,14 @@ Préparer les fonctions agentiques natives d’Upshift V2 pour les différents p
 
 **ECC Upshift Agents**. Les étudiants y améliorent le CRM, créent les agents et leurs skills, testent les parcours et mesurent les résultats sur l’activité retenue.
 
-> Socle de démonstration proposé : quatre agents, huit skills réutilisables, trois scénarios progressifs et un parcours commercial complet. Les travaux validés constituent une base pour V2.
+> Socle de démonstration proposé : quatre agents, huit skills réutilisables, trois scénarios progressifs et un parcours commercial complet. Les travaux validés constituent une base pour Upshift Agent.
 
 ## Sommaire
 
 - [01 · Mission et question de recherche](#01--mission-et-question-de-recherche)
 - [02 · Upshift et les processus de l’entreprise](#02--upshift-et-les-processus-de-lentreprise)
 - [03 · La dimension innovation](#03--la-dimension-innovation)
-- [04 · Construire une base pour Upshift V2](#04--construire-une-base-pour-upshift-v2)
+- [04 · Construire une base pour Upshift Agent](#04--construire-une-base-pour-upshift-agent)
 - [05 · Périmètre proposé pour le MVP](#05--périmètre-proposé-pour-le-mvp)
 - [06 · Des recherches aux cas d’usage](#06--des-recherches-aux-cas-dusage)
 - [07 · Configurer agents et skills](#07--configurer-agents-et-skills)
@@ -143,17 +143,17 @@ L’ambition est d’associer contexte de l’entreprise, mémoire utile, modèl
 
 > L’innovation est une contribution d’usage, de produit et d’intégration. L’équipe doit établir ce qui apporte une valeur supplémentaire par rapport au CRM manuel ou à une règle fixe.
 
-## 04 · Construire une base pour Upshift V2
+## 04 · Construire une base pour Upshift Agent
 
 ### La destination produit
 
-Upshift V2 a vocation à proposer nativement des agents et skills sur l’ensemble du parcours métier, de la prospection au reporting. Leur configuration, leur coordination et leur supervision feront partie du produit ; chaque entreprise définira leur activation et leurs délégations.
+Upshift Agent a vocation à proposer nativement des agents et skills sur l’ensemble du parcours métier, de la prospection au reporting. Leur configuration, leur coordination et leur supervision feront partie du produit ; chaque entreprise définira leur activation et leurs délégations.
 
 Le projet étudiant fournit des composants et des résultats qui seront sélectionnés puis industrialisés pour cette évolution.
 
 ### Les éléments à transmettre
 
-| Acquis du MVP | Base réutilisable pour V2 | Étape suivante |
+| Acquis du MVP | Base réutilisable pour Upshift Agent | Étape suivante |
 | --- | --- | --- |
 | Cas CRM amélioré | Modèle métier, états et parcours validés. | Éprouver la réutilisation sur d’autres processus. |
 | Agents et skills | Catalogue versionné, paramètres et tests. | Distribution, migration et suivi des versions. |
@@ -171,7 +171,7 @@ Le MVP porte sur une activité choisie. Sa démonstration ne suffit pas à valid
 
 Séparer le savoir-faire métier, les configurations, les adaptateurs de modèles et les outils d’action. Identifier ce qui est réutilisable, ce qui dépend de la version d’Upshift et ce qui reste expérimental. Expliquer comment le socle pourrait s’appliquer aux achats et stocks, aux projets et installations ou au SAV et à la maintenance, sans présenter ces extensions comme déjà validées.
 
-> Trajectoire : **expérimenter sur V1 → mesurer et sélectionner → industrialiser → intégrer nativement dans V2**. La soutenance du 8 décembre valide le prototype et ses enseignements. L’industrialisation de V2 vient ensuite.
+> Trajectoire : **expérimenter sur V1 → mesurer et sélectionner → industrialiser → intégrer nativement dans Upshift Agent**. La soutenance du 8 décembre valide le prototype et ses enseignements. L’industrialisation d’Upshift Agent vient ensuite.
 
 ## 05 · Périmètre proposé pour le MVP
 
@@ -189,7 +189,7 @@ Le CRM est le cas d’application retenu pour ce projet. Choisir une activité �
 | Jev | Un appel réel de décision ou de score, avec traitement de l’incertitude et des erreurs. |
 | Plusieurs modèles | Deux fournisseurs de modèles génératifs réellement testés sur un même contrat. |
 | Supervision | Simulation, pause, reprise, journal et validations ciblées dans Upshift. |
-| Transfert vers V2 | Configurations, skills, outils, tests et conclusions réutilisables. |
+| Transfert vers Upshift Agent | Configurations, skills, outils, tests et conclusions réutilisables. |
 
 ### Conditions techniques à lever dès le départ
 
@@ -541,7 +541,7 @@ Bootcamp du 15 au 21 octobre 2026, puis sprints d’une semaine. Chaque sprint c
 | Sprint 3 · 5–11 nov. | Acquisition et qualification. | Recherche sourcée, déduplication, appel Jev et score vérifiable. |
 | Sprint 4 · 12–18 nov. | Engagement et autonomie simple. | Message de test, réponse traitée, déclencheur et actions sans doublon. |
 | Sprint 5 · 19–25 nov. | Parcours d’affaire et coordination. | Quatre agents, skills partagés, proposition et conclusion documentée. |
-| Sprint 6 · 26 nov.–2 déc. | Comparer et fiabiliser. | Deux fournisseurs testés, évaluation, erreurs et composants candidats pour V2. |
+| Sprint 6 · 26 nov.–2 déc. | Comparer et fiabiliser. | Deux fournisseurs testés, évaluation, erreurs et composants candidats pour Upshift Agent. |
 | Sprint 7 · 3–9 déc. | Stabiliser, documenter et soutenir. | Version figée avant le 8, soutenance le 8 et dossier de transfert. |
 
 ### Définition d’une tâche terminée
@@ -563,7 +563,7 @@ Réduire d’abord le nombre de canaux, de sources et de modèles supplémentair
 - **Prototype :** configuration, coordination, supervision et parcours commercial.
 - **Intégrations :** Jev, deux fournisseurs testés, contrats d’actions et limites.
 - **Évaluation :** protocole, résultats, erreurs, coûts et traces reproductibles.
-- **Transfert V2 :** code ou exports, tests, procédure de reprise et priorités.
+- **Transfert vers Upshift Agent :** code ou exports, tests, procédure de reprise et priorités.
 - **Soutenance :** démonstration reproductible et solution de secours enregistrée.
 
 ### Recette du socle proposé
@@ -595,7 +595,7 @@ La durée officielle sera confirmée par l’encadrement.
 3. **Parcours autonome — 5 min :** acquisition, score, contact de test, réponse, proposition et conclusion documentée.
 4. **Maîtrise — 2 min :** cas incertain, refus, validation, pause ou événement rejoué.
 5. **Mesures et modèles — 3 min :** résultats, rôle de Jev, comparaison et limites.
-6. **Contribution à V2 — 1 min :** socle réutilisable et ouverture vers les autres processus de l’entreprise.
+6. **Contribution à Upshift Agent — 1 min :** socle réutilisable et ouverture vers les autres processus de l’entreprise.
 
 ### Ce que l’équipe doit savoir expliquer
 
@@ -614,7 +614,7 @@ Pourquoi un agent apporte une valeur ; ce qu’un skill réutilise ; quels outil
 
 **Prospect ou lead :** contact ou entreprise susceptible de devenir client. **Profil client idéal :** critères de la cible commerciale. **Score :** évaluation selon une grille, distincte d’une probabilité de vente. **Skill :** savoir-faire métier réutilisable. **Orchestration :** coordination des exécutions et de leurs états. **Action typée :** opération dont la structure et les paramètres sont définis et validés.
 
-> Le projet prépare une capacité native de V2 : des agents et skills que l’entreprise peut configurer pour comprendre son activité, agir dans ses limites et améliorer sa continuité opérationnelle.
+> Le projet prépare une capacité native d’Upshift Agent : des agents et skills que l’entreprise peut configurer pour comprendre son activité, agir dans ses limites et améliorer sa continuité opérationnelle.
 
 ## 19 · Références et statut des informations
 

@@ -1,0 +1,37 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Casablanca
+    open-pull-requests-limit: 5
+    labels: ["zone: dépendances"]
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      # The three SDK packages follow the ECC Upshift Agents workspace version: they move together, by hand.
+      - dependency-name: "twenty-sdk"
+      - dependency-name: "twenty-client-sdk"
+      - dependency-name: "twenty-ui"
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Casablanca
+    labels: ["zone: dépendances", "zone: CI"]
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ["*"]

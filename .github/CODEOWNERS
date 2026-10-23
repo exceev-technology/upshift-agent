@@ -1,0 +1,22 @@
+# Relecteurs demandés par défaut : toute l'équipe du projet.
+# Une seule approbation suffit, de l'encadrement ou de n'importe quel membre de l'équipe.
+*                          @exceev-technology/ecc-team-upshift-agent
+
+# Zones sensibles : l'encadrement est demandé en revue en plus de l'équipe.
+# Contrôle des actions, droits des agents, identifiants permanents.
+/src/contracts/            @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/src/roles/                @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/src/constants/            @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/src/application-config.ts @hamza-lem @exceev-technology/ecc-team-upshift-agent
+
+# Chaîne d'approvisionnement : CI, automatisations, dépendances.
+/.github/                  @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/package.json              @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/yarn.lock                 @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/.yarnrc.yml               @hamza-lem @exceev-technology/ecc-team-upshift-agent
+
+# Politiques du dépôt.
+/SECURITY.md               @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/CODE_OF_CONDUCT.md        @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/LICENSE                   @hamza-lem @exceev-technology/ecc-team-upshift-agent
+/AGENTS.md                 @hamza-lem @exceev-technology/ecc-team-upshift-agent

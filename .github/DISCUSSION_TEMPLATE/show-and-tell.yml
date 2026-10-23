@@ -1,0 +1,36 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Montrez ce qui marche : une démo, un skill, un résultat d'audit, une astuce. C'est aussi l'endroit pour préparer la Sprint Review.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: Ce que je montre
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Liens
+      description: Pull request, issue, vidéo, capture. Données fictives uniquement.
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: Statut
+      options:
+        - prévu
+        - simulé
+        - testé
+        - disponible
+    validations:
+      required: true
+
+  - type: textarea
+    id: learned
+    attributes:
+      label: Ce que j'ai appris
+      description: Une difficulté, une erreur évitée, une bonne pratique à partager.
