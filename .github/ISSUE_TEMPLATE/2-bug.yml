@@ -1,0 +1,101 @@
+name: 🐛 Bug
+description: Un comportement inattendu et reproductible.
+title: "[Bug] "
+type: Bug
+labels: ["type: bug", "statut: à trier"]
+projects: ["exceev-technology/2"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler ce problème.
+        **Une faille de sécurité ?** Ne l'écrivez pas ici : utilisez le [signalement privé](https://github.com/exceev-technology/upshift-agent/security/advisories/new).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: Ce qui se passe
+      description: Décrivez le problème en une ou deux phrases.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Lancer `yarn upshift dev:function:exec -n … -p '{…}'`
+        2. Ouvrir la fiche du prospect fictif « Atlas Démo »
+        3. Voir l'erreur
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Où ?
+      options:
+        - En local (lint, typecheck, tests, build)
+        - Dans la CI
+        - Dans l'espace ECC Upshift Agents
+        - Sur un serveur Upshift local (Docker)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Fournisseur IA concerné
+      options:
+        - Aucun
+        - TypeSafe AI (Jev)
+        - Anthropic
+        - Google
+        - Mistral
+        - OpenAI
+        - xAI
+        - Je ne sais pas
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Gravité
+      options:
+        - Bloque la démo ou le sprint
+        - Gênant, avec un contournement
+        - Mineur
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit ou version
+      description: Résultat de `git rev-parse --short HEAD`, ou version de l'app.
+      placeholder: 90fb5f8
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Journaux et messages d'erreur
+      description: Retirez toute clé, tout jeton et toute donnée personnelle avant de coller.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications
+      options:
+        - label: J'ai vérifié qu'aucune issue ouverte ne décrit déjà ce bug.
+          required: true
+        - label: Les journaux et captures ne contiennent ni secret ni donnée réelle.
+          required: true

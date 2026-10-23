@@ -17,32 +17,25 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# The test-instance action, its input and the CLI package keep their upstream SDK names.
 jobs:
-  test:
+  # Fast feedback, no test instance needed.
+  quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Spawn Upshift test instance
-        id: upshift
-        uses: twentyhq/twenty/.github/actions/spawn-twenty-app-dev-test@main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          twenty-version: ${{ env.UPSHIFT_VERSION }}
+          persist-credentials: false
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-
-      - name: Install the Upshift CLI
-        # Newest CLI release not above the workspace version (there is no 2.47.0).
-        run: npm install -g twenty@2.46.0
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -55,6 +48,43 @@ jobs:
 
       - name: Unit tests
         run: yarn test:unit
+
+      - name: Build the app and check its manifest
+        run: yarn upshift dev:build
+
+  # The test-instance action, its input and the CLI package keep their upstream SDK names.
+  # The action is pinned to a commit of the upstream main branch: update the SHA by hand.
+  integration:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Spawn Upshift test instance
+        id: upshift
+        uses: twentyhq/twenty/.github/actions/spawn-twenty-app-dev-test@99d3f780c49ed72925daa67f282e8c60bdd35aba # main, 2026-10-23
+        with:
+          twenty-version: ${{ env.UPSHIFT_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Install the Upshift CLI
+        # Newest CLI release not above the workspace version (there is no 2.47.0).
+        run: npm install -g twenty@2.46.0
+
+      - name: Install dependencies
+        run: yarn install --immutable
 
       - name: Run integration tests
         run: yarn test

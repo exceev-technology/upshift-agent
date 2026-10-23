@@ -1,0 +1,95 @@
+name: ✨ Fonctionnalité
+description: Une nouvelle capacité, écrite comme une story utilisateur avec ses critères d'acceptation.
+title: "[Fonctionnalité] "
+type: Feature
+labels: ["type: fonctionnalité", "statut: à trier"]
+projects: ["exceev-technology/2"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci ! Une bonne story tient en une phrase et se vérifie en démo.
+        Une idée encore floue ? Ouvrez plutôt une [discussion Ideas](https://github.com/exceev-technology/upshift-agent/discussions/categories/ideas).
+
+  - type: textarea
+    id: story
+    attributes:
+      label: Story utilisateur
+      description: Qui a besoin de quoi, et pourquoi ?
+      placeholder: En tant que responsable commercial, je veux que l'agent Qualification explique le score d'un prospect afin de décider de la prochaine action en confiance.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critères d'acceptation
+      description: Les conditions vérifiables en démo. Une ligne par critère.
+      placeholder: |
+        - [ ] Étant donné un prospect du corpus de test, quand l'agent B le qualifie, alors le score et ses trois raisons principales apparaissent sur la fiche.
+        - [ ] Étant donné une panne du fournisseur IA, quand l'agent B le qualifie, alors la fiche affiche un état « non évalué » explicite.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Zone concernée
+      multiple: true
+      options:
+        - Agents
+        - Skills
+        - Catalogue
+        - Contrat d'action
+        - Rôles et délégations
+        - Modèles IA (Jev, génératifs)
+        - Fonctions et outils
+        - Objets et vues CRM
+        - Supervision
+        - Documentation
+        - Autre
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: Scénario de la démo
+      options:
+        - 1 · Analyser (rechercher, qualifier, prioriser)
+        - 2 · Agir (écrire dans le CRM, déclencher une action)
+        - 3 · Coordonner (dossier passé entre plusieurs agents)
+        - Hors scénario
+    validations:
+      required: true
+
+  - type: input
+    id: catalog
+    attributes:
+      label: Agents et skills concernés
+      placeholder: "Agent B · Qualification ; S3 qualifier/scorer"
+
+  - type: textarea
+    id: controls
+    attributes:
+      label: Contrôles et cas limites
+      description: Droits, validations, doublons, pannes, refus de contact… Ce qui doit être bloqué compte autant que ce qui doit marcher.
+      placeholder: |
+        - Un prospect déjà présent n'est pas recréé.
+        - Sans approbation enregistrée, l'envoi reste en attente.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte et références
+      description: Section du sujet, maquette, lien vers une discussion, capture.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications
+      options:
+        - label: J'ai vérifié qu'aucune issue ouverte ne couvre déjà ce besoin.
+          required: true
+        - label: Cette issue ne contient ni donnée réelle ni secret.
+          required: true

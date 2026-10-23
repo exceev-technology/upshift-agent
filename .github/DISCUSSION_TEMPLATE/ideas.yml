@@ -1,0 +1,41 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Une idée à discuter avant d'en faire une story. Une fois l'idée mûre, l'équipe la transforme en issue « Fonctionnalité ».
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Le problème
+      description: Quelle difficulté, pour qui ? Partez du besoin, pas de la solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: La proposition
+      description: Ce que vous imaginez. Un agent, un skill, un outil, une vue, un contrôle…
+    validations:
+      required: true
+
+  - type: input
+    id: catalog
+    attributes:
+      label: Agents et skills concernés
+      placeholder: "Agent C · Engagement ; S6 analyser une réponse"
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      description: Ce qu'Upshift propose déjà, d'autres façons de faire.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications
+      options:
+        - label: Cette discussion ne contient ni donnée réelle ni secret.
+          required: true

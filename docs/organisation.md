@@ -1,14 +1,17 @@
 # Organisation
 
-Scrum allégé, sprints d'une semaine du jeudi au mercredi. Communication dans le canal Slack `#ecc-bootcamp-upshift-v2`, questions et blocages en fil de discussion.
+Scrum allégé, sprints d'une semaine du jeudi au mercredi. Communication dans le canal Slack `#ecc-bootcamp-upshift-agent`, questions et blocages en fil de discussion.
+
+Le mode d'emploi détaillé (tableau, jalons, modèles d'issues, cérémonies dans GitHub) est dans le wiki : [Scrum dans GitHub](wiki/Scrum-dans-GitHub.md).
 
 ## Rôles
 
 | Rôle | Qui | Responsabilité |
 | --- | --- | --- |
-| Product Owner | Hamza (Exceev) | Priorise le backlog, valide ce qui est démontré en revue |
+| Product Owner | Mostafa (ECC) | Priorise le backlog, valide ce qui est démontré en revue |
 | Responsable de la semaine | Un élève, en rotation à chaque sprint | Poste le planning et le récapitulatif, signale les blocages |
-| Équipe de développement | Asmae, Mostafa, Lina, Idriss T., Idriss E. | Réalise et démontre les tâches du sprint |
+| Équipe de développement | Asmae, Lina, Idriss T., Idriss E. | Réalise et démontre les tâches du sprint |
+| Référent | Hamza (Exceev) | Encadrement technique, accès et budget, revue des zones sensibles |
 | Accompagnement | Hajar (Exceev), Nouhan (ECC) | Support et suivi pédagogique |
 
 ## Cérémonies
@@ -42,10 +45,10 @@ Jours fériés : 6 nov. (Marche Verte) et 18 nov. (Fête de l'Indépendance). En
 
 ## Travailler dans le dépôt
 
-- Une issue, une branche, une pull request. Branches : `feat/…`, `fix/…`, `docs/…`.
-- Messages de commit en anglais, à l'impératif (`feat: add score-prospect tool`).
+- Une issue, une branche, une pull request. Branches : `feat/12-…`, `fix/…`, `docs/…`. Détails : [CONTRIBUTING.md](../CONTRIBUTING.md).
+- Messages de commit et titres de PR en anglais, au format Conventional Commits (`feat: add score-prospect tool`).
 - Avant la revue : `yarn lint`, `yarn typecheck`, `yarn test:unit` et `yarn upshift dev:build` passent.
-- Backlog : tableau simple (GitHub Projects ou Trello) — À faire / En cours / Terminé — partagé dans le canal.
+- Backlog : le [tableau GitHub du projet](https://github.com/orgs/exceev-technology/projects/2) (Backlog, Todo, In Progress, In Review, Done) ; un sprint = un [jalon](https://github.com/exceev-technology/upshift-agent/milestones).
 - Découpez en tâches de 1 à 2 jours. Bloqué plus d'une demi-journée : écrivez-le dans le canal.
 
 ## À montrer en démonstration

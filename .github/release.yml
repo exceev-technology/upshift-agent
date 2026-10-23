@@ -1,0 +1,20 @@
+# Catégories des notes de version générées par GitHub, d'après les libellés des PR fusionnées.
+changelog:
+  exclude:
+    labels:
+      - "statut: doublon"
+      - "statut: invalide"
+      - "statut: ne sera pas fait"
+  categories:
+    - title: ✨ Fonctionnalités
+      labels: ["type: fonctionnalité"]
+    - title: 🐛 Corrections
+      labels: ["type: bug"]
+    - title: 🔒 Sécurité
+      labels: ["type: sécurité"]
+    - title: 📚 Documentation
+      labels: ["type: documentation"]
+    - title: 🔧 Maintenance
+      labels: ["type: tâche", "zone: dépendances", "zone: CI"]
+    - title: Autres changements
+      labels: ["*"]

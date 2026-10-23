@@ -1,0 +1,33 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Pas de question bête. Pensez à marquer la réponse qui vous a aidé·e comme **réponse acceptée** : la prochaine personne la trouvera tout de suite.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Votre question
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: Ce que vous avez essayé
+      description: Pages lues, commandes lancées, résultat obtenu.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte
+      description: Commande, message d'erreur, version, extrait de code. Retirez toute clé ou donnée personnelle.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications
+      options:
+        - label: J'ai cherché dans les discussions, les issues et le wiki.
+          required: true

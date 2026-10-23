@@ -1,0 +1,21 @@
+# Relecteurs requis par défaut : toute l'équipe du projet.
+*                         @exceev-technology/ecc-team-upshift-v2
+
+# Zones sensibles : la revue de l'encadrement est obligatoire.
+# Contrôle des actions, droits des agents, identifiants permanents.
+/src/contracts/           @hamza-lem
+/src/roles/               @hamza-lem
+/src/constants/           @hamza-lem
+/src/application-config.ts @hamza-lem
+
+# Chaîne d'approvisionnement : CI, automatisations, dépendances.
+/.github/                 @hamza-lem
+/package.json             @hamza-lem
+/yarn.lock                @hamza-lem
+/.yarnrc.yml              @hamza-lem
+
+# Politiques du dépôt.
+/SECURITY.md              @hamza-lem
+/CODE_OF_CONDUCT.md       @hamza-lem
+/LICENSE                  @hamza-lem
+/AGENTS.md                @hamza-lem

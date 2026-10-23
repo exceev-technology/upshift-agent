@@ -1,0 +1,48 @@
+# Libellés posés automatiquement sur les pull requests (.github/workflows/pr-labeler.yml).
+
+# Type, d'après le préfixe de la branche.
+"type: fonctionnalité":
+  - head-branch: ["^feat/"]
+"type: bug":
+  - head-branch: ["^fix/"]
+"type: documentation":
+  - head-branch: ["^docs/"]
+"type: tâche":
+  - head-branch: ["^(chore|ci|build|refactor|test|perf)/"]
+"type: sécurité":
+  - head-branch: ["^security/"]
+
+# Zone, d'après les fichiers modifiés.
+"zone: agents":
+  - changed-files:
+      - any-glob-to-any-file: ["src/agents/**", "src/catalog/agents.ts"]
+"zone: skills":
+  - changed-files:
+      - any-glob-to-any-file: ["src/skills/**", "src/catalog/skills.ts"]
+"zone: catalogue":
+  - changed-files:
+      - any-glob-to-any-file: ["src/catalog/**"]
+"zone: contrats":
+  - changed-files:
+      - any-glob-to-any-file: ["src/contracts/**"]
+"zone: rôles":
+  - changed-files:
+      - any-glob-to-any-file: ["src/roles/**"]
+"zone: modèles IA":
+  - changed-files:
+      - any-glob-to-any-file: ["src/models/**"]
+"zone: fonctions":
+  - changed-files:
+      - any-glob-to-any-file: ["src/logic-functions/**"]
+"zone: CRM":
+  - changed-files:
+      - any-glob-to-any-file: ["src/objects/**", "src/fields/**", "src/views/**", "src/page-layouts/**"]
+"zone: docs":
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "*.md"]
+"zone: CI":
+  - changed-files:
+      - any-glob-to-any-file: [".github/**"]
+"zone: dépendances":
+  - changed-files:
+      - any-glob-to-any-file: ["package.json", "yarn.lock", ".yarnrc.yml"]
