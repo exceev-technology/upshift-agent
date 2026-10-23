@@ -183,6 +183,7 @@ L'auteur·e de la PR répond à chaque commentaire et **résout** la conversatio
 - Fusion en **squash** uniquement : un commit par PR sur `main`, avec le titre de la PR.
 - La branche est supprimée automatiquement après la fusion.
 - `main` est protégée : pas de push direct, pas de force-push, CI verte et revue obligatoires.
+- Seule exception : l'encadrement, administrateur de l'organisation, peut fusionner ses propres PR sans approbation en cochant le contournement de la revue. La CI, CodeQL et la résolution des conversations restent obligatoires pour tout le monde.
 - Le [CHANGELOG](CHANGELOG.md) est mis à jour dans la PR quand le changement est visible pour l'utilisateur. Les notes de version GitHub sont générées à partir des libellés.
 
 ## Libellés
