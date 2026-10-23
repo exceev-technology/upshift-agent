@@ -77,7 +77,7 @@ Sprints d'une semaine, **du jeudi au mercredi**.
 ## Les rôles dans GitHub
 
 **Product Owner**
-- Trie les nouvelles issues (`statut: à trier`) au moins deux fois par semaine : priorité, critères d'acceptation, `statut: prêt` ou fermeture motivée.
+- Trie les nouvelles issues au moins deux fois par semaine depuis la [liste `statut: à trier`](https://github.com/exceev-technology/upshift-agent/issues?q=is%3Aopen+label%3A%22statut%3A+%C3%A0+trier%22) : priorité, critères d'acceptation, `statut: prêt` ou fermeture motivée. Partez de cette liste plutôt que du tableau : une issue ouverte par une personne extérieure à l'équipe n'y arrive que par le workflow d'ajout automatique du projet.
 - Ordonne la colonne Backlog : ce qui est en haut passe en premier.
 - Accepte ou refuse en review, au regard des critères d'acceptation.
 
