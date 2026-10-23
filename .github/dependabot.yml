@@ -17,6 +17,16 @@ updates:
       - dependency-name: "twenty-sdk"
       - dependency-name: "twenty-client-sdk"
       - dependency-name: "twenty-ui"
+      # Major toolchain upgrades are migrations, done by hand in their own issue.
+      # TypeScript 7 (native compiler) breaks Yarn's built-in TypeScript patch and the update job itself.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # Vitest 5 needs `vite` as a peer dependency and a test-setup review.
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      # Node type definitions follow the Node 24 runtime (.nvmrc, engines).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         dependency-type: development
