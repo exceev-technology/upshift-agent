@@ -7,7 +7,7 @@ Ce qui peut empêcher une démonstration réussie le 8 décembre, ce qui nous al
 | ID | Risque | P | I | Score | Signal d'alerte | Parade | Responsable | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R1 | Accès à Jev, aux fournisseurs génératifs ou au budget IA confirmés trop tard | 2 | 3 | 6 | Aucun appel réel à Jev à la fin du sprint 2 | Confirmer les accès au sprint 1 ; en attendant, développer contre un simulateur déclaré *simulé* | Encadrement, PO | ouvert |
-| R2 | Membres pas encore actifs sur GitHub | 2 | 3 | 6 | Un membre sans PR fusionnée à la fin du sprint 1 | Invitations envoyées, issue d'arrivée assignée, binôme pour la première PR | Hamza | ouvert |
+| R2 | Membres pas encore actifs sur GitHub | 1 | 3 | 3 | Un membre sans PR fusionnée à la fin du sprint 1 | Accès GitHub de toute l'équipe effectif le 27 oct. ; issues d'arrivée assignées à chacun, binôme pour la première PR | Hamza | surveillé |
 | R3 | Courbe d'apprentissage cumulée : Git, Scrum, SDK, agents | 3 | 2 | 6 | PR ouvertes depuis plus de 3 jours, CI rouge répétée, peu de commits | Parcours d'arrivée, exercices du wiki, programmation en binôme, questions en Q&A | Responsable de la semaine | ouvert |
 | R4 | Revues lentes : les PR attendent et bloquent | 2 | 2 | 4 | Une PR en attente de revue depuis plus de 24 h ouvrées | Revue sous 24 h, demandée nominativement ; zones sensibles relues deux fois par semaine | Toute l'équipe | ouvert |
 | R5 | Périmètre trop ambitieux, scénario 3 inachevé | 2 | 3 | 6 | Scénario 1 non démontré à la fin du sprint 3 | Scénarios dans l'ordre ; réduire d'abord canaux, sources et modèles ; arbitrage en review | PO | ouvert |

@@ -6,8 +6,8 @@
 | --- | --- | --- | --- |
 | Product Owner | Mostafa Amine Zakani (ECC) | [@mostafa-amine-zakani](https://github.com/mostafa-amine-zakani) | Porte la vision, trie et priorise le backlog, accepte ou refuse ce qui est démontré en review |
 | Responsable de la semaine (Scrum Master) | Un membre de l'équipe de développement, en rotation | — | Publie le planning et le récap du sprint, anime le daily, tient le tableau à jour, signale les blocages |
-| Équipe de développement | Lina Assabane | à compléter | Réalise et démontre les tâches du sprint |
-| | Asmae El Khalloui | à compléter | |
+| Équipe de développement | Lina Assabane | [@Lina-Assabane](https://github.com/Lina-Assabane) | Réalise et démontre les tâches du sprint |
+| | Asmae El Khalloui | [@asmaeelkh](https://github.com/asmaeelkh) | |
 | | Idriss Tayyeb | [@idrisscentrale-source](https://github.com/idrisscentrale-source) | |
 | | Idriss El Barkaki | [@idriss-el-barkaki](https://github.com/idriss-el-barkaki) | |
 | Référent et mainteneur | Hamza Lemrani (Exceev) | [@hamza-lem](https://github.com/hamza-lem) | Encadrement technique, revue des zones sensibles, accès et budget |
