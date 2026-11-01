@@ -47,3 +47,4 @@ Bloqué·e depuis plus d'une demi-journée ? Écrivez-le dans le canal et posez 
 
 | Membre | Ce que j'apporte | Ce que je veux apprendre |
 | --- | --- | --- |
+| Mostafa Amine Zakani | Vision produit, priorisation du backlog, coordination de l'équipe | Collaborer en open source et construire des agents IA en TypeScript |
