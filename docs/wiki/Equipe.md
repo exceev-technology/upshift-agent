@@ -47,3 +47,4 @@ Bloqué·e depuis plus d'une demi-journée ? Écrivez-le dans le canal et posez 
 
 | Membre | Ce que j'apporte | Ce que je veux apprendre |
 | --- | --- | --- |
+| Lina Assabane | Organisation, coordination et contribution au développement du projet | Git, TypeScript et développement d'agents IA |
