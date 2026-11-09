@@ -66,7 +66,7 @@ jobs:
 
       - name: Spawn Upshift test instance
         id: upshift
-        uses: twentyhq/twenty/.github/actions/spawn-twenty-app-dev-test@99d3f780c49ed72925daa67f282e8c60bdd35aba # main, 2026-10-23
+        uses: twentyhq/twenty/.github/actions/spawn-twenty-app-dev-test@8b685dfad3e8b6cdadec2556f4c107e36cc06f6e # main, 2026-10-23
         with:
           twenty-version: ${{ env.UPSHIFT_VERSION }}
 
