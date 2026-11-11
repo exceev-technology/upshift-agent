@@ -49,3 +49,4 @@ Bloqué·e depuis plus d'une demi-journée ? Écrivez-le dans le canal et posez 
 | --- | --- | --- |
 | Lina Assabane | Organisation, coordination et contribution au développement du projet | Git, TypeScript et développement d'agents IA |
 | Asmae El Khalloui (@asmaeelkh) | Organisation, suivi de projet et rédaction de documentation | Git/GitHub et le travail en équipe sur du code |
+| Mostafa Amine Zakani | Vision produit, priorisation du backlog, coordination de l'équipe | Collaborer en open source et construire des agents IA en TypeScript |
